@@ -52,11 +52,29 @@ void test_bundle() {
     };
 }
 
+void test_bundleN() {
+    hv_t a =        {1, 0, 1, 0, 1, 1, 1, 1, 1, 1};
+    hv_t b =        {0, 1, 0, 1, 1, 0, 0, 1, 1, 0};
+    hv_t c =        {0, 1, 0, 1, 1, 0, 0, 1, 1, 0};
+    hv_t out_gold = {0, 1, 0, 1, 1, 0, 0, 1, 1, 0};
+    hv_t out;
+    std::array<hv_t, 3> hvs = {a, b, c};
+
+    bsc_bundleN(out, hvs);
+    if (out == out_gold) {
+        std::cout << a << std::endl;
+        std::cout << b << std::endl;
+        std::cout << c << std::endl;
+        std::cout << out << std::endl;
+    };
+}
+
+
 int main () {
     //hv_t vec;
     //printf("Hello World\n");
     //std::cout << vec << std::endl;
     //test_bind();
-    test_bindN();
+    test_bundleN();
 }
 
