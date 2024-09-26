@@ -1,3 +1,4 @@
+#include <array>
 #include <iostream>
 
 #include <ap_int.h>
@@ -24,6 +25,17 @@ void test_bind() {
     bsc_bind(out, a, b);
 }
 
+void test_bindN() {
+    hv_t a =        {1, 0, 1, 0, 1, 1, 1, 1, 1, 0};
+    hv_t b =        {0, 1, 0, 1, 1, 0, 0, 1, 1, 0};
+    hv_t c =        {1, 0, 0, 1, 1, 0, 0, 1, 1, 0};
+    hv_t out_gold = {0, 1, 1, 0, 1, 1, 1, 1, 1, 0};
+    hv_t out;
+    std::array<hv_t, 3> hvs = {a, b, c};
+
+    bsc_bindN(out, hvs);
+}
+
 void test_bundle() {
     hv_t a =        {1, 0, 1, 0, 1, 1, 1, 1, 1, 1};
     hv_t b =        {0, 1, 0, 1, 1, 0, 0, 1, 1, 0};
@@ -45,7 +57,6 @@ int main () {
     //printf("Hello World\n");
     //std::cout << vec << std::endl;
     //test_bind();
-    test_bundle();
+    test_bindN();
 }
-
 
