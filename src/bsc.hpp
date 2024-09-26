@@ -71,3 +71,28 @@ void bsc_distN(
         bsc_dist(dists[i], query, am[i]);
     }
 }
+
+template<size_t N>
+void bsc_search(
+        size_t &argmin,
+        const hv_t &query,
+        const std::array<hv_t, N> am) {
+    static_assert(N > 0, "The size of the associative memory must be greater than 1");
+    // TODO: Using a sub function might not be the best for the HLS tool to create
+    // an optimized design, but it is the easiest implementation at the moment.
+    // Revisit this function implementation when optimizing code.
+
+    hls::vector<dim_t, N> dists = static_cast<dim_t>(0);
+    bsc_distN(dists, query, am);
+
+    //using ind_t = ap_uint<number_of_bits(N)>;
+    argmin = 0;
+    dim_t val = dists[0];
+    Argmin:
+    for (size_t i = 1; i < N; i++) {
+        if (val > dists[i]) {
+            val = dists[i];
+            argmin = i;
+        }
+    }
+}

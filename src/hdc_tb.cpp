@@ -124,6 +124,25 @@ void test_distN() {
     };
 }
 
+void test_search() {
+    hv_t q = {1, 0, 1, 0, 1, 1, 1, 1, 1, 1};
+    hv_t a = {0, 1, 0, 1, 1, 0, 0, 1, 1, 0}; // Dist 7
+    hv_t b = {1, 1, 1, 0, 1, 1, 0, 0, 0, 0}; // Dist 5
+    hv_t c = {0, 1, 0, 1, 0, 0, 0, 0, 0, 0}; // Dist 10
+    size_t out_gold = 1;
+    size_t out = -1;
+    std::array<hv_t, 3> am = {a, b, c};
+
+    bsc_search(out, q, am);
+    if (out != out_gold) {
+        std::cout << q << std::endl;
+        std::cout << a << std::endl;
+        std::cout << b << std::endl;
+        std::cout << c << std::endl;
+        std::cout << out << " != " << out_gold << std::endl;
+    };
+}
+
 int main () {
     //hv_t vec;
     //printf("Hello World\n");
@@ -132,6 +151,7 @@ int main () {
     //test_bindN();
     //test_bundleN();
     //test_dist();
-    test_distN();
+    //test_distN();
+    test_search();
 }
 
