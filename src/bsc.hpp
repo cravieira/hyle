@@ -57,3 +57,17 @@ void bsc_bundleN(hv_t &out, const std::array<hv_t, N> &hvs) {
 
 void bsc_dist(dim_t &out, const hv_t &a, const hv_t &b);
 
+template<size_t N>
+void bsc_distN(
+        hls::vector<dim_t, N> &dists,
+        const hv_t &query,
+        const std::array<hv_t, N> am) {
+    // TODO: Using a sub function might not be the best for the HLS tool to create
+    // an optimized design, but it is the easiest implementation at the moment.
+    // Revisit this function implementation when optimizing code.
+
+    ComputeDist:
+    for (size_t i = 0; i < N; i++) {
+        bsc_dist(dists[i], query, am[i]);
+    }
+}
