@@ -1,3 +1,5 @@
+#pragma once
+
 #include <ap_int.h>
 #include <hls_vector.h>
 #include <array>
@@ -15,6 +17,10 @@ using bin_t = ap_uint<1>;
 using hv_t = hls::vector<bin_t, DIM>;
 // An uint big enough to store the number of dimensions
 using dim_t = ap_uint<number_of_bits(DIM)>;
+
+// Non-member printer function for BSC hypervectors, i.e., hls::vector with
+// binary digits
+std::ostream& operator<<(std::ostream& os, const hv_t v);
 
 // BSC
 

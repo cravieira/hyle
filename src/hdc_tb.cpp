@@ -7,17 +7,6 @@
 
 #include "bsc.hpp"
 
-// Non-member printer function for BSC hypervectors, i.e., hls::vector with
-// binary digits
-std::ostream& operator<<(std::ostream& os, const hv_t v) {
-    for (auto it = v.cbegin(); it != v.cend(); it++) {
-        //os << std::hex << std::setw(1) << std::setfill('0') << *it;
-        os << *it;
-    }
-
-    return os;
-}
-
 // Pretty printer for hls::vector
 template<typename T, size_t N>
 std::ostream& operator<<(std::ostream& os, const hls::vector<T, N> c) {

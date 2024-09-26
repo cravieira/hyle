@@ -1,6 +1,17 @@
 #include "bsc.hpp"
 #include <cstddef>
 
+// Non-member printer function for BSC hypervectors, i.e., hls::vector with
+// binary digits
+std::ostream& operator<<(std::ostream& os, const hv_t v) {
+    for (auto it = v.cbegin(); it != v.cend(); it++) {
+        //os << std::hex << std::setw(1) << std::setfill('0') << *it;
+        os << *it;
+    }
+
+    return os;
+}
+
 void bsc_bind(hv_t &out, const hv_t &a, const hv_t &b) {
     out = a ^ b;
 }
