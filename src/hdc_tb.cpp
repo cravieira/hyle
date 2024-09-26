@@ -23,6 +23,11 @@ void test_bind() {
     hv_t out;
 
     bsc_bind(out, a, b);
+    if (out != out_gold) {
+        std::cout << a << std::endl;
+        std::cout << b << std::endl;
+        std::cout << out << std::endl;
+    };
 }
 
 void test_bindN() {
@@ -34,6 +39,12 @@ void test_bindN() {
     std::array<hv_t, 3> hvs = {a, b, c};
 
     bsc_bindN(out, hvs);
+    if (out != out_gold) {
+        std::cout << a << std::endl;
+        std::cout << b << std::endl;
+        std::cout << c << std::endl;
+        std::cout << out << std::endl;
+    };
 }
 
 void test_bundle() {
@@ -44,7 +55,7 @@ void test_bundle() {
     hv_t out;
 
     bsc_bundle(out, a, b, c);
-    if (out == out_gold) {
+    if (out != out_gold) {
         std::cout << a << std::endl;
         std::cout << b << std::endl;
         std::cout << c << std::endl;
@@ -61,7 +72,7 @@ void test_bundleN() {
     std::array<hv_t, 3> hvs = {a, b, c};
 
     bsc_bundleN(out, hvs);
-    if (out == out_gold) {
+    if (out != out_gold) {
         std::cout << a << std::endl;
         std::cout << b << std::endl;
         std::cout << c << std::endl;
@@ -69,12 +80,27 @@ void test_bundleN() {
     };
 }
 
+void test_dist() {
+    hv_t a =        {1, 0, 1, 0, 1, 1, 1, 1, 1, 1};
+    hv_t b =        {0, 1, 0, 1, 1, 0, 0, 1, 1, 0};
+    dim_t out_gold = 7;
+    dim_t out = -1;
+
+    bsc_dist(out, a, b);
+    if (out != out_gold) {
+        std::cout << a << std::endl;
+        std::cout << b << std::endl;
+        std::cout << out << " != " << out_gold << std::endl;
+    };
+}
 
 int main () {
     //hv_t vec;
     //printf("Hello World\n");
     //std::cout << vec << std::endl;
     //test_bind();
-    test_bundleN();
+    //test_bindN();
+    //test_bundleN();
+    test_dist();
 }
 

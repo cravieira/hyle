@@ -4,14 +4,17 @@
 #include <cstddef>
 #include <iostream>
 
-constexpr int DIM = 10;
-using bin_t = ap_uint<1>;
-using hv_t = hls::vector<bin_t, DIM>;
-
 // Utility functions
 constexpr size_t number_of_bits(size_t x) {
     return x < 2 ? x : 1+number_of_bits(x >> 1);
 }
+
+// Type definitions
+constexpr int DIM = 10;
+using bin_t = ap_uint<1>;
+using hv_t = hls::vector<bin_t, DIM>;
+// An uint big enough to store the number of dimensions
+using dim_t = ap_uint<number_of_bits(DIM)>;
 
 // BSC
 
@@ -36,7 +39,6 @@ template<size_t N>
 void bsc_bundleN(hv_t &out, const std::array<hv_t, N> &hvs) {
     constexpr size_t acc_bits = number_of_bits(N);
     using acc_elem_t = ap_uint<acc_bits>;
-    using acc_t = hls::vector<acc_elem_t, DIM>;
 
     // Copy the LSB of each accumulator to the output
     MajColumn:
@@ -52,4 +54,6 @@ void bsc_bundleN(hv_t &out, const std::array<hv_t, N> &hvs) {
         out[col] = static_cast<bin_t>(sum[acc_bits-1]);
     }
 }
+
+void bsc_dist(dim_t &out, const hv_t &a, const hv_t &b);
 
