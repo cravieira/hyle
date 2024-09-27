@@ -6,10 +6,7 @@
 #include <cstddef>
 #include <iostream>
 
-// Utility functions
-constexpr size_t number_of_bits(size_t x) {
-    return x < 2 ? x : 1+number_of_bits(x >> 1);
-}
+#include "common.hpp"
 
 // Type definitions
 constexpr int DIM = 10;
@@ -88,7 +85,7 @@ void bsc_search(
     // an optimized design, but it is the easiest implementation at the moment.
     // Revisit this function implementation when optimizing code.
 
-    hls::vector<dim_t, N> dists = static_cast<dim_t>(0);
+    hls::vector<dim_t, N> dists = static_cast<dim_t>(0); // TODO: Should this buffer be static?
     bsc_distN(dists, query, am);
 
     //using ind_t = ap_uint<number_of_bits(N)>;

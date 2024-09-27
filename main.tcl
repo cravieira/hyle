@@ -1,5 +1,6 @@
 open_project vitis_main -reset
 add_file -tb "src/hdc_tb.cpp"
+add_file -tb "src/common.hpp"
 
 add_file "src/bsc.cpp"
 add_file "src/bsc.hpp"
