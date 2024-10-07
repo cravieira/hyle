@@ -14,3 +14,4 @@ create_clock -period 10
 csim_design
 csynth_design
 
+export_design -flow syn
