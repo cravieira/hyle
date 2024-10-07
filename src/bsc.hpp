@@ -79,7 +79,7 @@ template<size_t N>
 void bsc_search(
         size_t &argmin,
         const hv_t &query,
-        const std::array<hv_t, N> am) {
+        const std::array<hv_t, N> &am) {
     static_assert(N > 0, "The size of the associative memory must be greater than 1");
     // TODO: Using a sub function might not be the best for the HLS tool to create
     // an optimized design, but it is the easiest implementation at the moment.
