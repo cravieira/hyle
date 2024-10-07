@@ -7,7 +7,7 @@ add_file "src/bsc.hpp"
 add_file "src/voicehd.cpp"
 add_file "src/voicehd.hpp"
 
-set_top voicehd
+set_top voicehd_enc
 open_solution "solution1"
 set_part  {xc7z020clg400-1}
 create_clock -period 10
