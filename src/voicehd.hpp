@@ -5,7 +5,7 @@
 #include <cstdint>
 #include <ap_int.h>
 
-const size_t VOICEHD_CLASSES = 10;
+const size_t VOICEHD_CLASSES = 26;
 const size_t VOICEHD_FEATURES = 617;
 const size_t VOICEHD_LEVELS = 10;
 using class_t = ap_uint<number_of_bits(VOICEHD_CLASSES)>;
