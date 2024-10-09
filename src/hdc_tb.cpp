@@ -69,15 +69,27 @@ void test_bundleN() {
     hv_t a =        {1, 0, 1, 0, 1, 1, 1, 1, 1, 1};
     hv_t b =        {0, 1, 0, 1, 1, 0, 0, 1, 1, 0};
     hv_t c =        {0, 1, 0, 1, 1, 0, 0, 1, 1, 0};
+    hv_t d =        {1, 0, 1, 0, 1, 1, 1, 1, 1, 1};
+    hv_t e =        {0, 1, 0, 1, 1, 0, 0, 1, 1, 0};
+    hv_t f =        {0, 1, 0, 1, 1, 0, 0, 1, 1, 0};
+    hv_t g =        {1, 0, 1, 0, 1, 1, 1, 1, 1, 1};
+    hv_t h =        {0, 1, 0, 1, 1, 0, 0, 1, 1, 0};
+    hv_t i =        {0, 1, 0, 1, 1, 0, 0, 1, 1, 0};
     hv_t out_gold = {0, 1, 0, 1, 1, 0, 0, 1, 1, 0};
     hv_t out;
-    std::array<hv_t, 3> hvs = {a, b, c};
+    std::array<hv_t, 9> hvs = {a, b, c, d, e, f, g, h, i};
 
     bsc_bundleN(out, hvs);
     if (out != out_gold) {
         std::cout << a << std::endl;
         std::cout << b << std::endl;
         std::cout << c << std::endl;
+        std::cout << d << std::endl;
+        std::cout << e << std::endl;
+        std::cout << f << std::endl;
+        std::cout << g << std::endl;
+        std::cout << h << std::endl;
+        std::cout << i << std::endl;
         std::cout << out << std::endl;
     };
 }

@@ -53,8 +53,10 @@ void bsc_bundleN(hv_t &out, const std::array<hv_t, N> &hvs) {
             sum += hvs[row][col];
         }
 
-        // Get the MSB of the sum. This should be equivalent to the thresholding
-        out[col] = static_cast<bin_t>(sum[acc_bits-1]);
+        const acc_elem_t threshold(N/2);
+        // The use of ">" instead of ">=" makes the results equal to TorchHD
+        bin_t bit = sum > threshold ? 1 : 0;
+        out[col] = bit;
     }
 }
 
