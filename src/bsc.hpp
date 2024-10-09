@@ -7,13 +7,13 @@
 #include <iostream>
 
 #include "common.hpp"
+#include "defines.hpp"
 
 // Type definitions
-constexpr int DIM = 10;
 using bin_t = ap_uint<1>;
-using hv_t = hls::vector<bin_t, DIM>;
+using hv_t = hls::vector<bin_t, HV_SEGMENT_SIZE>;
 // An uint big enough to store the number of dimensions
-using dim_t = ap_uint<number_of_bits(DIM)>;
+using dim_t = ap_uint<number_of_bits(HV_SEGMENT_SIZE)>;
 
 // Non-member printer function for BSC hypervectors, i.e., hls::vector with
 // binary digits
