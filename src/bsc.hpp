@@ -45,7 +45,7 @@ void bsc_bundleN(hv_t &out, const std::array<hv_t, N> &hvs) {
 
     // Copy the LSB of each accumulator to the output
     MajColumn:
-    for (size_t col = 0; col < DIM; col++) {
+    for (size_t col = 0; col < hvs[0].size(); col++) {
         acc_elem_t sum = 0;
 
         AccColumn:

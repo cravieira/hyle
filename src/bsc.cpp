@@ -25,7 +25,7 @@ void bsc_bundle(hv_t &out, const hv_t &a, const hv_t &b, const hv_t &c) {
 
     // Copy the LSB of each accumulator to the output
     MajColumn:
-    for (size_t i = 0; i < DIM; i++) {
+    for (size_t i = 0; i < a.size(); i++) {
         acc_elem_t t_a = a[i];
         acc_elem_t t_b = b[i];
         acc_elem_t t_c = c[i];
@@ -41,7 +41,7 @@ void bsc_dist(dim_t &out, const hv_t &a, const hv_t &b) {
     out = 0;
 
     AddReduce:
-    for (size_t i = 0; i < DIM; i++) {
+    for (size_t i = 0; i < a.size(); i++) {
         out = out + static_cast<dim_t>(temp[i]);
     }
 }
