@@ -7,6 +7,7 @@
 
 #include "bsc.hpp"
 #include "common.hpp"
+#include "defines.hpp"
 
 const size_t VOICEHD_CLASSES = 26;
 const size_t VOICEHD_FEATURES = 617;
@@ -28,4 +29,14 @@ void voicehd_enc(
         const std::array<hv_t, VOICEHD_FEATURES> &im,
         const std::array<hv_t, VOICEHD_LEVELS>   &cim,
         const std::array<hv_t, VOICEHD_CLASSES>  &am
+        );
+
+template<size_t N>
+using hv_mem_seg_t = std::array<std::array<hv_t, N>, HV_SEGMENTS>;
+void voicehd_enc_seg(
+        class_t &pred,
+        const feat_vec_t &features,
+        const hv_mem_seg_t<VOICEHD_FEATURES> &im,
+        const hv_mem_seg_t<VOICEHD_LEVELS>   &cim,
+        const hv_mem_seg_t<VOICEHD_CLASSES>  &am
         );
