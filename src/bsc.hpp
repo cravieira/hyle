@@ -13,7 +13,7 @@
 using bin_t = ap_uint<1>;
 using hv_t = hls::vector<bin_t, HV_SEGMENT_SIZE>;
 // An uint big enough to store the number of dimensions
-using dim_t = ap_uint<number_of_bits(HV_SEGMENT_SIZE)>;
+using dim_t = ap_uint<number_of_bits(HV_SEGMENT_SIZE*HV_SEGMENTS)>;
 
 // Non-member printer function for BSC hypervectors, i.e., hls::vector with
 // binary digits
