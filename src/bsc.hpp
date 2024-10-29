@@ -44,11 +44,11 @@ void bsc_bundleN(hv_t &out, const std::array<hv_t, N> &hvs) {
     using acc_elem_t = ap_uint<acc_bits>;
 
     // Copy the LSB of each accumulator to the output
-    MajColumn:
+    BundleN_MajColumn:
     for (size_t col = 0; col < hvs[0].size(); col++) {
         acc_elem_t sum = 0;
 
-        AccColumn:
+        BundleN_AccColumn:
         for (size_t row = 0; row < N; row++) {
             sum += hvs[row][col];
         }

@@ -20,6 +20,8 @@ static void _read_mem(
         const std::array<hv_t, N> &mem,
         size_t ind
         ) {
+    #pragma HLS inline
+
     // TODO: Will this create a register buffer for out? Or could we optimize for
     // single-cycle by removing the buffers? Are rvalue and && necessary for such
     // use case?
@@ -105,7 +107,7 @@ void voicehd_enc_seg_dp(
     hv_t item, c_item;
     static std::array<hv_t, VOICEHD_FEATURES> bound_hvs; // TODO: Sequential access
 
-    Bind:
+    SegmentBind:
     for (size_t channel = 0; channel < VOICEHD_FEATURES; channel++) {
         // Read memories
         // TODO: Reading items from IM is sequential. Maybe it could profit
