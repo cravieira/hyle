@@ -6,18 +6,12 @@
 #include <cstdint>
 
 template<size_t N>
-static void _init_mem(
-        std::array<hv_t, N> &mem
-        ) {
-    for (size_t i = 0; i < N; i++) {
-        mem[i] = static_cast<bin_t>(0);
-    }
-}
-
-template<size_t N>
 static void _read_mem(
+        //hv_t &out,
+        //const std::array<hv_t, N> &mem,
+        //size_t ind
         hv_t &out,
-        const std::array<hv_t, N> &mem,
+        const hv_t (&mem)[N],
         size_t ind
         ) {
     #pragma HLS inline
@@ -28,81 +22,20 @@ static void _read_mem(
     out = mem[ind];
 }
 
-void voicehd_top(
-        class_t &pred,
-        const std::array<feat_t, VOICEHD_FEATURES> &features
-        ) {
-    // TODO: Should the memories be defined outside the function so it is possible to write them?
-    static std::array<hv_t, VOICEHD_FEATURES> im;
-    static std::array<hv_t, VOICEHD_LEVELS> cim;
-    static std::array<hv_t, VOICEHD_CLASSES> am;
-    _init_mem(im);
-    _init_mem(cim);
-    _init_mem(am);
-
-    hv_t item, c_item;
-    static std::array<hv_t, VOICEHD_FEATURES> bound_hvs; // TODO: Sequential access
-
-    Bind:
-    for (size_t channel = 0; channel < VOICEHD_FEATURES; channel++) {
-        // Read memories
-        // TODO: Reading items from IM is sequential. Maybe it could profit
-        // from a sequential access pragma.
-        _read_mem<VOICEHD_FEATURES>(item, im, channel);
-        _read_mem<VOICEHD_LEVELS>(c_item, cim, features[channel]);
-
-        // Encode
-        bsc_bind(bound_hvs[channel], item, c_item);
-    }
-
-    // Bundle
-    static hv_t query;
-    bsc_bundleN<VOICEHD_FEATURES>(query, bound_hvs);
-
-    // Search
-    size_t argmax;
-    bsc_search<VOICEHD_CLASSES>(argmax, query, am);
-    pred = static_cast<class_t>(argmax);
-}
-
-void voicehd_enc(
-        class_t &pred,
-        const std::array<feat_t, VOICEHD_FEATURES> &features,
-        const std::array<hv_t, VOICEHD_FEATURES> &im,
-        const std::array<hv_t, VOICEHD_LEVELS>   &cim,
-        const std::array<hv_t, VOICEHD_CLASSES>  &am
-        ) {
-    hv_t item, c_item;
-    static std::array<hv_t, VOICEHD_FEATURES> bound_hvs; // TODO: Sequential access
-
-    Bind:
-    for (size_t channel = 0; channel < VOICEHD_FEATURES; channel++) {
-        // Read memories
-        // TODO: Reading items from IM is sequential. Maybe it could profit
-        // from a sequential access pragma.
-        _read_mem<VOICEHD_FEATURES>(item, im, channel);
-        _read_mem<VOICEHD_LEVELS>(c_item, cim, features[channel]);
-
-        // Encode
-        bsc_bind(bound_hvs[channel], item, c_item);
-    }
-
-    // Bundle
-    static hv_t query;
-    bsc_bundleN<VOICEHD_FEATURES>(query, bound_hvs);
-
-    // Search
-    size_t argmax;
-    bsc_search<VOICEHD_CLASSES>(argmax, query, am);
-    pred = static_cast<class_t>(argmax);
-}
-
 void voicehd_enc_seg_dp(
+        //hls::vector<dim_t, VOICEHD_CLASSES> &dists,
+        //const feat_vec_t &features,
+        //const std::array<hv_t, VOICEHD_FEATURES> &im,
+        //const std::array<hv_t, VOICEHD_LEVELS>   &cim,
+        //const std::array<hv_t, VOICEHD_CLASSES>  &am
+
         hls::vector<dim_t, VOICEHD_CLASSES> &dists,
         const feat_vec_t &features,
-        const std::array<hv_t, VOICEHD_FEATURES> &im,
-        const std::array<hv_t, VOICEHD_LEVELS>   &cim,
-        const std::array<hv_t, VOICEHD_CLASSES>  &am) {
+        const hv_t (&im)[VOICEHD_FEATURES],
+        const hv_t (&cim)[VOICEHD_LEVELS],
+        const hv_t (&am)[VOICEHD_CLASSES]
+
+        ) {
 
     hv_t item, c_item;
     static std::array<hv_t, VOICEHD_FEATURES> bound_hvs; // TODO: Sequential access
@@ -127,11 +60,16 @@ void voicehd_enc_seg_dp(
 }
 
 void voicehd_enc_seg(
+        //class_t &pred,
+        //const feat_vec_t &features,
+        //const hv_mem_seg_t<VOICEHD_FEATURES> &im,
+        //const hv_mem_seg_t<VOICEHD_LEVELS>   &cim,
+        //const hv_mem_seg_t<VOICEHD_CLASSES>  &am
         class_t &pred,
         const feat_vec_t &features,
-        const hv_mem_seg_t<VOICEHD_FEATURES> &im,
-        const hv_mem_seg_t<VOICEHD_LEVELS>   &cim,
-        const hv_mem_seg_t<VOICEHD_CLASSES>  &am
+        const hv_t (&im)[HV_SEGMENTS][VOICEHD_FEATURES],
+        const hv_t (&cim)[HV_SEGMENTS][VOICEHD_LEVELS],
+        const hv_t (&am)[HV_SEGMENTS][VOICEHD_CLASSES]
         ) {
 
     hls::vector<dim_t, VOICEHD_CLASSES> acc_dists = static_cast<dim_t>(0); // TODO: Should this buffer be static?

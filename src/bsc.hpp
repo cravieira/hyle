@@ -66,7 +66,9 @@ template<size_t N>
 void bsc_distN(
         hls::vector<dim_t, N> &dists,
         const hv_t &query,
-        const std::array<hv_t, N> am) {
+        //const std::array<hv_t, N> am
+        const hv_t (&am)[N]
+        ) {
     // TODO: Using a sub function might not be the best for the HLS tool to create
     // an optimized design, but it is the easiest implementation at the moment.
     // Revisit this function implementation when optimizing code.
@@ -81,7 +83,8 @@ template<size_t N>
 void bsc_search(
         size_t &argmin,
         const hv_t &query,
-        const std::array<hv_t, N> &am) {
+        const hv_t (&am)[N]
+        ) {
     static_assert(N > 0, "The size of the associative memory must be greater than 1");
     // TODO: Using a sub function might not be the best for the HLS tool to create
     // an optimized design, but it is the easiest implementation at the moment.

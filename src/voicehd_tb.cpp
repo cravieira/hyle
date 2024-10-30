@@ -142,12 +142,13 @@ mem_data_t parse_mem_file(const std::string &path) {
     return mem_data;
 }
 
+//template<size_t N>
+//std::array<std::array<hv_t, N>, HV_SEGMENTS>
 template<size_t N>
-std::array<std::array<hv_t, N>, HV_SEGMENTS>
-segment_mem(const mem_data_t &parsed_mem) {
+void segment_mem(const mem_data_t &parsed_mem, hv_t reshaped_mem[HV_SEGMENTS][N]) {
     const size_t expected_hv_size = HV_SEGMENTS*HV_SEGMENT_SIZE;
 
-    std::array<std::array<hv_t, N>, HV_SEGMENTS> reshaped_mem;
+    //std::array<std::array<hv_t, N>, HV_SEGMENTS> reshaped_mem;
 
     for (size_t s = 0; s < HV_SEGMENTS; s++) {
         for (size_t n = 0; n < N; n++) {
@@ -160,18 +161,22 @@ segment_mem(const mem_data_t &parsed_mem) {
             }
         }
     }
-    return reshaped_mem;
+    //return reshaped_mem;
 }
 
 int seg_main() {
     auto im_data = parse_mem_file("/home/zelda/Documents/git/vitis/hdc-hls/serial/bsc-d1000-id.txt");
-    auto im = segment_mem<VOICEHD_FEATURES>(im_data);
+    //auto im = segment_mem<VOICEHD_FEATURES>(im_data);
+    hv_t im[HV_SEGMENTS][VOICEHD_FEATURES];
+    segment_mem<VOICEHD_FEATURES>(im_data, im);
 
     auto cim_data = parse_mem_file("/home/zelda/Documents/git/vitis/hdc-hls/serial/bsc-d1000-cim.txt");
-    auto cim = segment_mem<VOICEHD_LEVELS>(cim_data);
+    hv_t cim[HV_SEGMENTS][VOICEHD_LEVELS];
+    segment_mem<VOICEHD_LEVELS>(cim_data, cim);
 
     auto am_data = parse_mem_file("/home/zelda/Documents/git/vitis/hdc-hls/serial/bsc-d1000-am.txt");
-    auto am = segment_mem<VOICEHD_CLASSES>(am_data);
+    hv_t am[HV_SEGMENTS][VOICEHD_CLASSES];
+    segment_mem<VOICEHD_CLASSES>(am_data, am);
 
     auto test_ds = read_dataset("/home/zelda/Documents/git/vitis/hdc-hls/serial/test_data.txt");
     auto test_labels = read_labels("/home/zelda/Documents/git/vitis/hdc-hls/serial/test_label.txt");

@@ -34,7 +34,10 @@ set_directive_unroll -factor ${datapaths} voicehd_enc_seg/VoiceHD_Segment
 
 # voicehd_enc_seg() #
 # Partition IM memory
-set_directive_array_partition -dim 2 -factor ${datapaths} voicehd_enc_seg im
+# Works, but takes too long to synthesize. The results are the same as with std::array
+set_directive_array_partition -dim 2 voicehd_enc_seg im
+set_directive_array_partition -dim 2 voicehd_enc_seg cim
+set_directive_array_partition -dim 2 voicehd_enc_seg am
 
 # Unroll argmin
 set_directive_unroll voicehd_enc_seg/Argmin; # Unroll parallel dimensions accumulation (vertical)
@@ -61,6 +64,8 @@ set_directive_unroll bsc_bundleN/BundleN_AccColumn; # Unroll parallel dimensions
 
 # bsc_bind
 set_directive_inline bsc_bind
+
+#csim_design -O
 
 csynth_design
 #cosim_design -O
