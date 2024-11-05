@@ -2,7 +2,6 @@
 
 #include <ap_int.h>
 #include <hls_vector.h>
-#include <array>
 #include <cstddef>
 #include <iostream>
 
@@ -24,7 +23,7 @@ std::ostream& operator<<(std::ostream& os, const hv_t v);
 void bsc_bind(hv_t &out, const hv_t &a, const hv_t &b);
 
 template<size_t N>
-void bsc_bindN(hv_t &out, const std::array<hv_t, N> &hvs) {
+void bsc_bindN(hv_t &out, const hv_t (&hvs)[N]) {
     static_assert(
             N > 2,
             "Number of vectors in \"hvs\" collection must be greater than 2");
@@ -39,7 +38,7 @@ void bsc_bindN(hv_t &out, const std::array<hv_t, N> &hvs) {
 void bsc_bundle(hv_t &out, const hv_t &a, const hv_t &b, const hv_t &c);
 
 template<size_t N>
-void bsc_bundleN(hv_t &out, const std::array<hv_t, N> &hvs) {
+void bsc_bundleN(hv_t &out, const hv_t (&hvs)[N]) {
     constexpr size_t acc_bits = number_of_bits(N);
     using acc_elem_t = ap_uint<acc_bits>;
 
@@ -66,7 +65,6 @@ template<size_t N>
 void bsc_distN(
         hls::vector<dim_t, N> &dists,
         const hv_t &query,
-        //const std::array<hv_t, N> am
         const hv_t (&am)[N]
         ) {
     // TODO: Using a sub function might not be the best for the HLS tool to create

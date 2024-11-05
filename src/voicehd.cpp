@@ -33,8 +33,7 @@ void voicehd_enc_seg_dp(
         ) {
 
     hv_t item, c_item;
-    //hv_t bound_hvs[VOICEHD_FEATURES];
-    std::array<hv_t, VOICEHD_FEATURES> bound_hvs;
+    hv_t bound_hvs[VOICEHD_FEATURES];
 
     SegmentBind:
     for (size_t channel = 0; channel < VOICEHD_FEATURES; channel++) {

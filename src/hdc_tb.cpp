@@ -38,7 +38,7 @@ void test_bindN() {
     hv_t c =        {1, 0, 0, 1, 1, 0, 0, 1, 1, 0};
     hv_t out_gold = {0, 1, 1, 0, 1, 1, 1, 1, 1, 0};
     hv_t out;
-    std::array<hv_t, 3> hvs = {a, b, c};
+    hv_t hvs[] = {a, b, c};
 
     bsc_bindN(out, hvs);
     if (out != out_gold) {
@@ -77,7 +77,7 @@ void test_bundleN() {
     hv_t i =        {0, 1, 0, 1, 1, 0, 0, 1, 1, 0};
     hv_t out_gold = {0, 1, 0, 1, 1, 0, 0, 1, 1, 0};
     hv_t out;
-    std::array<hv_t, 9> hvs = {a, b, c, d, e, f, g, h, i};
+    hv_t hvs[] = {a, b, c, d, e, f, g, h, i};
 
     bsc_bundleN(out, hvs);
     if (out != out_gold) {
@@ -114,7 +114,7 @@ void test_distN() {
     hv_t b =        {1, 1, 1, 0, 1, 1, 0, 0, 0, 0};
     hls::vector<dim_t, 2> out_gold = {7, 5};
     hls::vector<dim_t, 2> out = static_cast<dim_t>(0);
-    std::array<hv_t, 2> am = {a, b};
+    hv_t am[] = {a, b};
 
     bsc_distN(out, q, am);
     if (out != out_gold) {
@@ -132,7 +132,7 @@ void test_search() {
     hv_t c = {0, 1, 0, 1, 0, 0, 0, 0, 0, 0}; // Dist 10
     size_t out_gold = 1;
     size_t out = -1;
-    std::array<hv_t, 3> am = {a, b, c};
+    hv_t am[] = {a, b, c};
 
     bsc_search(out, q, am);
     if (out != out_gold) {
