@@ -1,6 +1,7 @@
 #include "voicehd.hpp"
 #include "bsc.hpp"
 #include "defines.hpp"
+#include "hls_vector.h"
 
 #include <cstddef>
 #include <cstdint>
@@ -23,22 +24,17 @@ static void _read_mem(
 }
 
 void voicehd_enc_seg_dp(
-        //hls::vector<dim_t, VOICEHD_CLASSES> &dists,
-        //const feat_vec_t &features,
-        //const std::array<hv_t, VOICEHD_FEATURES> &im,
-        //const std::array<hv_t, VOICEHD_LEVELS>   &cim,
-        //const std::array<hv_t, VOICEHD_CLASSES>  &am
-
-        hls::vector<dim_t, VOICEHD_CLASSES> &dists,
+        hls::vector<dim_t, VOICEHD_CLASSES> &out_dists,
         const feat_vec_t &features,
         const hv_t (&im)[VOICEHD_FEATURES],
         const hv_t (&cim)[VOICEHD_LEVELS],
-        const hv_t (&am)[VOICEHD_CLASSES]
-
+        const hv_t (&am)[VOICEHD_CLASSES],
+        hls::vector<dim_t, VOICEHD_CLASSES> &acc_dists
         ) {
 
     hv_t item, c_item;
-    static std::array<hv_t, VOICEHD_FEATURES> bound_hvs; // TODO: Sequential access
+    //hv_t bound_hvs[VOICEHD_FEATURES];
+    std::array<hv_t, VOICEHD_FEATURES> bound_hvs;
 
     SegmentBind:
     for (size_t channel = 0; channel < VOICEHD_FEATURES; channel++) {
@@ -53,18 +49,15 @@ void voicehd_enc_seg_dp(
     }
 
     // Bundle
-    static hv_t query;
+    hv_t query;
     bsc_bundleN<VOICEHD_FEATURES>(query, bound_hvs);
 
+    hls::vector<dim_t, VOICEHD_CLASSES> dists;
     bsc_distN<VOICEHD_CLASSES>(dists, query, am);
+    out_dists = acc_dists + dists;
 }
 
 void voicehd_enc_seg(
-        //class_t &pred,
-        //const feat_vec_t &features,
-        //const hv_mem_seg_t<VOICEHD_FEATURES> &im,
-        //const hv_mem_seg_t<VOICEHD_LEVELS>   &cim,
-        //const hv_mem_seg_t<VOICEHD_CLASSES>  &am
         class_t &pred,
         const feat_vec_t &features,
         const hv_t (&im)[HV_SEGMENTS][VOICEHD_FEATURES],
@@ -73,20 +66,17 @@ void voicehd_enc_seg(
         ) {
 
     hls::vector<dim_t, VOICEHD_CLASSES> acc_dists = static_cast<dim_t>(0); // TODO: Should this buffer be static?
-    hls::vector<dim_t, VOICEHD_CLASSES> seg_dists = static_cast<dim_t>(0); // TODO: Should this buffer be static?
     VoiceHD_Segment:
     for (size_t s = 0; s < HV_SEGMENTS; s++) {
         // Compute segment distance
         voicehd_enc_seg_dp(
-                seg_dists,
+                acc_dists,
                 features,
                 im[s],
                 cim[s],
-                am[s]
+                am[s],
+                acc_dists
                 );
-
-        // Accumulate segment distance into the accumulator
-        acc_dists = acc_dists + seg_dists;
     }
 
     // Compute argmin of distances to predict correct class
