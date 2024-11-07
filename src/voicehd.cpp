@@ -24,16 +24,18 @@ static void _read_mem(
 }
 
 void voicehd_enc_seg_dp(
-        hls::vector<dim_t, VOICEHD_CLASSES> &out_dists,
         const feat_vec_t &features,
         const hv_t (&im)[VOICEHD_FEATURES],
         const hv_t (&cim)[VOICEHD_LEVELS],
         const hv_t (&am)[VOICEHD_CLASSES],
-        hls::vector<dim_t, VOICEHD_CLASSES> &acc_dists
+        size_t datapath_id,
+        hls::vector<dim_t, VOICEHD_CLASSES> (&s_acc_dists)[SEGMENT_DATAPATHS]
         ) {
 
     hv_t item, c_item;
     hv_t bound_hvs[VOICEHD_FEATURES];
+
+    hls::vector<dim_t, VOICEHD_CLASSES> &acc_dists = s_acc_dists[datapath_id];
 
     SegmentBind:
     for (size_t channel = 0; channel < VOICEHD_FEATURES; channel++) {
@@ -53,7 +55,7 @@ void voicehd_enc_seg_dp(
 
     hls::vector<dim_t, VOICEHD_CLASSES> dists;
     bsc_distN<VOICEHD_CLASSES>(dists, query, am);
-    out_dists = acc_dists + dists;
+    acc_dists += dists;
 }
 
 void voicehd_enc_seg(
@@ -64,18 +66,31 @@ void voicehd_enc_seg(
         const hv_t (&am)[HV_SEGMENTS][VOICEHD_CLASSES]
         ) {
 
-    hls::vector<dim_t, VOICEHD_CLASSES> acc_dists = static_cast<dim_t>(0); // TODO: Should this buffer be static?
+    static hls::vector<dim_t, VOICEHD_CLASSES> s_acc_dists[SEGMENT_DATAPATHS];
+
+    // Clean-up accumulator banks
+    for (size_t i = 0; i < SEGMENT_DATAPATHS; i++) {
+        s_acc_dists[i] = static_cast<dim_t>(0);
+    }
+
     VoiceHD_Segment:
     for (size_t s = 0; s < HV_SEGMENTS; s++) {
         // Compute segment distance
         voicehd_enc_seg_dp(
-                acc_dists,
                 features,
                 im[s],
                 cim[s],
                 am[s],
-                acc_dists
+                s % SEGMENT_DATAPATHS,
+                s_acc_dists
                 );
+    }
+
+    // Accumulate dists of all datapaths
+    hls::vector<dim_t, VOICEHD_CLASSES> acc_dists = static_cast<dim_t>(0);
+    VoiceHD_Dist_Accumulation:
+    for (size_t dp = 0; dp < SEGMENT_DATAPATHS; dp++) {
+        acc_dists += s_acc_dists[dp];
     }
 
     // Compute argmin of distances to predict correct class

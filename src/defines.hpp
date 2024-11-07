@@ -8,6 +8,11 @@
 #define __HV_SEGMENT_SIZE__ __HV_DIMENSIONS__
 #endif
 
+// Number of parallel datapaths to process each HV segment
+#ifndef __SEGMENT_DATAPATHS__
+#define __SEGMENT_DATAPATHS__ 1
+#endif
+
 #include <cstddef>
 
 // Transform defines in constexpr constants. This allows for value assertion
@@ -15,4 +20,5 @@
 constexpr size_t DIM = __HV_DIMENSIONS__;
 constexpr size_t HV_SEGMENT_SIZE = __HV_SEGMENT_SIZE__;
 constexpr size_t HV_SEGMENTS = DIM/HV_SEGMENT_SIZE;
+constexpr size_t SEGMENT_DATAPATHS = __SEGMENT_DATAPATHS__;
 

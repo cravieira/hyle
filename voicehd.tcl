@@ -1,6 +1,8 @@
 # Define HV constants
-set DIM 10
+#set DIM 10
 set DIM 1024
+#set DIM 16384
+#set DIM 32768
 set SEGMENT_SIZE 1
 set datapaths 1; # Number of parallel segment datapaths
 
@@ -12,7 +14,7 @@ puts "Using ${datapaths} datapaths"
 puts "argv ${argv} argc ${argc}"
 
 set SEGMENTS [expr $DIM / $SEGMENT_SIZE]
-set cflags "-D__HV_DIMENSIONS__=${DIM} -D__HV_SEGMENT_SIZE__=${SEGMENT_SIZE}"
+set cflags "-D__HV_DIMENSIONS__=${DIM} -D__HV_SEGMENT_SIZE__=${SEGMENT_SIZE} -D__SEGMENT_DATAPATHS__=${datapaths}"
 
 open_project "vitis_voicehd-d${DIM}-seg_size${SEGMENT_SIZE}-dp${datapaths}" -reset
 
@@ -31,10 +33,18 @@ set_part  {xc7z020clg400-1}
 create_clock -period 10
 
 set_directive_unroll -factor ${datapaths} voicehd_enc_seg/VoiceHD_Segment
+#set_directive_allocation -limit ${datapaths} -type function voicehd_enc_seg voicehd_enc_seg_dp; # Worse results
+set_directive_function_instantiate voicehd_enc_seg_dp datapath_id
 
 # voicehd_enc_seg() #
 # Partition IM memory
 # Works, but takes too long to synthesize. The results are the same as with std::array
+set_directive_interface -mode ap_memory -storage_type rom_1p voicehd_enc_seg im
+set_directive_interface -mode ap_memory -storage_type rom_1p voicehd_enc_seg cim
+set_directive_interface -mode ap_memory -storage_type rom_1p voicehd_enc_seg am
+set_directive_array_partition -dim 1 -type cyclic -factor ${datapaths} voicehd_enc_seg im
+set_directive_array_partition -dim 1 -type cyclic -factor ${datapaths} voicehd_enc_seg cim
+set_directive_array_partition -dim 1 -type cyclic -factor ${datapaths} voicehd_enc_seg am
 set_directive_array_partition -dim 2 voicehd_enc_seg im
 set_directive_array_partition -dim 2 voicehd_enc_seg cim
 set_directive_array_partition -dim 2 voicehd_enc_seg am
@@ -42,6 +52,8 @@ set_directive_array_partition -dim 2 voicehd_enc_seg am
 # Unroll argmin
 set_directive_unroll voicehd_enc_seg/Argmin; # Unroll parallel dimensions accumulation (vertical)
 
+# voicehd_enc_seg_dp() #
+set_directive_array_partition voicehd_enc_seg s_acc_dists
 # Unroll bind
 set_directive_unroll voicehd_enc_seg_dp/SegmentBind; # Unroll parallel dimensions accumulation (vertical)
 
@@ -66,6 +78,8 @@ set_directive_unroll bsc_bundleN/BundleN_AccColumn; # Unroll parallel dimensions
 set_directive_inline bsc_bind
 
 #csim_design -O
+#csim_design -setup
+#csim_design
 
 csynth_design
 #cosim_design -O
