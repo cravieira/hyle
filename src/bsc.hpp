@@ -14,6 +14,11 @@ using hv_t = hls::vector<bin_t, HV_SEGMENT_SIZE>;
 // An uint big enough to store the number of dimensions
 using dim_t = ap_uint<number_of_bits(HV_SEGMENT_SIZE*HV_SEGMENTS)>;
 
+// Special types used for the "Bind and Bundle" operator
+using bnb_acc_elem_t = ap_uint<10>; // TODO: This can later be optimized to fit
+                                    // only the necessary bits in accumulation.
+using bnb_acc_t = hls::vector<bnb_acc_elem_t, HV_SEGMENT_SIZE>;
+
 // Non-member printer function for BSC hypervectors, i.e., hls::vector with
 // binary digits
 std::ostream& operator<<(std::ostream& os, const hv_t v);
@@ -58,6 +63,18 @@ void bsc_bundleN(hv_t &out, const hv_t (&hvs)[N]) {
         out[col] = bit;
     }
 }
+
+void bsc_bnb_threshold(
+        hv_t &out,
+        const bnb_acc_t &acc,
+        const bnb_acc_elem_t &threshold);
+
+void bsc_bnb(
+        bnb_acc_t &acc_out,
+        const hv_t &a,
+        const hv_t &b,
+        const bnb_acc_t &acc_in
+);
 
 void bsc_dist(dim_t &out, const hv_t &a, const hv_t &b);
 
