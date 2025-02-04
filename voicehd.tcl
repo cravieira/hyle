@@ -1,9 +1,9 @@
 # Define HV constants
-#set DIM 10
-set DIM 1024
+set DIM 1000
+#set DIM 32
 #set DIM 16384
 #set DIM 32768
-set SEGMENT_SIZE 1
+set SEGMENT_SIZE 1000
 set datapaths 1; # Number of parallel segment datapaths
 
 if { $argc != 0 } {
@@ -32,16 +32,20 @@ open_solution "solution1"
 set_part  {xc7z020clg400-1}
 create_clock -period 10
 
+# voicehd_enc_seg_dp() #
 set_directive_unroll -factor ${datapaths} voicehd_enc_seg/VoiceHD_Segment
-set_directive_function_instantiate voicehd_enc_seg_dp datapath_id
+set_directive_array_partition voicehd_enc_seg s_acc_dists
 
-source tcl/voicehd_opt.tcl
+# Accelerator optimizations. Pick one!
+source tcl/voicehd_opt.tcl; # Vertical unrolled design
+#source tcl/voicehd_bnb.tcl; # Multi-cycle encoding with fused bind-and-bundle
 
+csim_design
 #csim_design -O
 #csim_design -setup
-#csim_design
 
-csynth_design
+#csynth_design
 #cosim_design -O
 
 #export_design -flow syn
+#export_design -flow impl

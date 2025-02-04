@@ -23,20 +23,60 @@ static void _read_mem(
     out = mem[ind];
 }
 
-void voicehd_enc_seg_dp(
+/**
+ * @brief VoiceHD encoding using the fused bind-and-bundle operation.
+ *
+ * @param[out] query
+ * @param[in] features Dataset input features
+ * @param[in] im Reference to an Item Memory (IM) array
+ * @param[in] cim Reference to a Continuous Item Memory (CIM) array
+ */
+void voicehd_enc_bnb(
+        hv_t &query,
         const feat_vec_t &features,
         const hv_t (&im)[VOICEHD_FEATURES],
-        const hv_t (&cim)[VOICEHD_LEVELS],
-        const hv_t (&am)[VOICEHD_CLASSES],
-        size_t datapath_id,
-        hls::vector<dim_t, VOICEHD_CLASSES> (&s_acc_dists)[SEGMENT_DATAPATHS]
+        const hv_t (&cim)[VOICEHD_LEVELS]
         ) {
+#pragma HLS inline
 
     hv_t item, c_item;
     hv_t bound_hvs[VOICEHD_FEATURES];
 
-    hls::vector<dim_t, VOICEHD_CLASSES> &acc_dists = s_acc_dists[datapath_id];
+    bnb_acc_t bundle_acc = static_cast<bnb_acc_elem_t>(0);
+    SegmentBind:
+    for (size_t channel = 0; channel < VOICEHD_FEATURES; channel++) {
+        // Read memories
+        // TODO: Reading items from IM is sequential. Maybe it could profit
+        // from a sequential access pragma.
+        _read_mem<VOICEHD_FEATURES>(item, im, channel);
+        _read_mem<VOICEHD_LEVELS>(c_item, cim, features[channel]);
 
+        // Encode
+        bsc_bnb(bundle_acc, item, c_item, bundle_acc);
+    }
+    bsc_bnb_threshold(query, bundle_acc, VOICEHD_FEATURES/2);
+}
+
+/**
+ * @brief VoiceHD encoding using split binding and bundling operations.
+ *
+ * @param[out] query
+ * @param[in] features Dataset input features
+ * @param[in] im Reference to an Item Memory (IM) array
+ * @param[in] cim Reference to a Continuous Item Memory (CIM) array
+ */
+void voicehd_enc_vertical_unroll(
+        hv_t &query,
+        const feat_vec_t &features,
+        const hv_t (&im)[VOICEHD_FEATURES],
+        const hv_t (&cim)[VOICEHD_LEVELS]
+        ) {
+#pragma HLS inline
+
+    hv_t item, c_item;
+    hv_t bound_hvs[VOICEHD_FEATURES];
+
+    // Encode with split bind and bundle
     SegmentBind:
     for (size_t channel = 0; channel < VOICEHD_FEATURES; channel++) {
         // Read memories
@@ -50,8 +90,24 @@ void voicehd_enc_seg_dp(
     }
 
     // Bundle
-    hv_t query;
     bsc_bundleN<VOICEHD_FEATURES>(query, bound_hvs);
+}
+
+void voicehd_enc_seg_dp(
+        const feat_vec_t &features,
+        const hv_t (&im)[VOICEHD_FEATURES],
+        const hv_t (&cim)[VOICEHD_LEVELS],
+        const hv_t (&am)[VOICEHD_CLASSES],
+        size_t datapath_id,
+        hls::vector<dim_t, VOICEHD_CLASSES> (&s_acc_dists)[SEGMENT_DATAPATHS]
+        ) {
+
+    hls::vector<dim_t, VOICEHD_CLASSES> &acc_dists = s_acc_dists[datapath_id];
+    hv_t query;
+
+    // Encoding stage. Choose one option only!
+    voicehd_enc_vertical_unroll(query, features, im, cim);
+    //voicehd_enc_bnb(query, features, im, cim);
 
     hls::vector<dim_t, VOICEHD_CLASSES> dists;
     bsc_distN<VOICEHD_CLASSES>(dists, query, am);
@@ -69,6 +125,8 @@ void voicehd_enc_seg(
     static hls::vector<dim_t, VOICEHD_CLASSES> s_acc_dists[SEGMENT_DATAPATHS];
 
     // Clean-up accumulator banks
+    // TODO: Maybe unroll this loop in tcl?
+    ResetAccumulators:
     for (size_t i = 0; i < SEGMENT_DATAPATHS; i++) {
         s_acc_dists[i] = static_cast<dim_t>(0);
     }
