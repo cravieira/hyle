@@ -94,6 +94,35 @@ void test_bundleN() {
     };
 }
 
+void test_bnb() {
+    hv_t a =        {1, 0, 0, 1, 1, 1, 0, 0, 1, 1};
+    hv_t b =        {0, 1, 0, 1, 1, 0, 0, 1, 1, 0};
+    hv_t c =        {0, 1, 1, 0, 1, 0, 0, 1, 1, 1};
+    hv_t d =        {1, 0, 1, 0, 1, 0, 0, 0, 0, 1};
+    hv_t e =        {0, 1, 0, 1, 1, 0, 0, 0, 0, 0};
+    hv_t f =        {0, 1, 1, 1, 1, 0, 0, 1, 0, 1};
+    hv_t out_gold = {1, 1, 0, 0, 0, 0, 0, 1, 0, 1};
+    hv_t out;
+    hv_t hvs[] = {a, b, c, d, e, f};
+
+    bnb_acc_t acc = static_cast<bnb_acc_elem_t>(0);
+    bsc_bnb(acc, a, b, acc);
+    bsc_bnb(acc, c, d, acc);
+    bsc_bnb(acc, e, f, acc);
+    bsc_bnb_threshold(out, acc, 1);
+
+    if (out != out_gold) {
+        std::cout << a << std::endl;
+        std::cout << b << std::endl;
+        std::cout << c << std::endl;
+        std::cout << d << std::endl;
+        std::cout << e << std::endl;
+        std::cout << f << std::endl;
+        std::cout << out << std::endl;
+    };
+}
+
+
 void test_dist() {
     hv_t a =        {1, 0, 1, 0, 1, 1, 1, 1, 1, 1};
     hv_t b =        {0, 1, 0, 1, 1, 0, 0, 1, 1, 0};
@@ -144,15 +173,17 @@ void test_search() {
     };
 }
 
+
 int main () {
     //hv_t vec;
     //printf("Hello World\n");
     //std::cout << vec << std::endl;
-    //test_bind();
-    //test_bindN();
-    //test_bundleN();
-    //test_dist();
-    //test_distN();
+    test_bind();
+    test_bindN();
+    test_bundleN();
+    test_bnb();
+    test_dist();
+    test_distN();
     test_search();
 }
 
