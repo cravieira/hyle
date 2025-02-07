@@ -13,6 +13,8 @@ using bin_t = ap_uint<1>;
 using hv_t = hls::vector<bin_t, HV_SEGMENT_SIZE>;
 // An uint big enough to store the number of dimensions
 using dim_t = ap_uint<number_of_bits(HV_SEGMENT_SIZE*HV_SEGMENTS)>;
+// An uint big enought to store the max distance between BSC HVs.
+using dist_t = ap_uint<number_of_bits(DIM)>;
 
 // Special types used for the "Bind and Bundle" operator
 using bnb_acc_elem_t = ap_uint<10>; // TODO: This can later be optimized to fit
@@ -76,11 +78,11 @@ void bsc_bnb(
         const bnb_acc_t &acc_in
 );
 
-void bsc_dist(dim_t &out, const hv_t &a, const hv_t &b);
+void bsc_dist(dist_t &out, const hv_t &a, const hv_t &b);
 
 template<size_t N>
 void bsc_distN(
-        hls::vector<dim_t, N> &dists,
+        hls::vector<dist_t, N> &dists,
         const hv_t &query,
         const hv_t (&am)[N]
         ) {
@@ -105,12 +107,12 @@ void bsc_search(
     // an optimized design, but it is the easiest implementation at the moment.
     // Revisit this function implementation when optimizing code.
 
-    hls::vector<dim_t, N> dists = static_cast<dim_t>(0); // TODO: Should this buffer be static?
+    hls::vector<dist_t, N> dists = static_cast<dist_t>(0); // TODO: Should this buffer be static?
     bsc_distN(dists, query, am);
 
     //using ind_t = ap_uint<number_of_bits(N)>;
     argmin = 0;
-    dim_t val = dists[0];
+    dist_t val = dists[0];
     Argmin:
     for (size_t i = 1; i < N; i++) {
         if (val > dists[i]) {

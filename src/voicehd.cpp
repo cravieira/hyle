@@ -99,17 +99,17 @@ void voicehd_enc_seg_dp(
         const hv_t (&cim)[VOICEHD_LEVELS],
         const hv_t (&am)[VOICEHD_CLASSES],
         size_t datapath_id,
-        hls::vector<dim_t, VOICEHD_CLASSES> (&s_acc_dists)[SEGMENT_DATAPATHS]
+        hls::vector<dist_t, VOICEHD_CLASSES> (&s_acc_dists)[SEGMENT_DATAPATHS]
         ) {
 
-    hls::vector<dim_t, VOICEHD_CLASSES> &acc_dists = s_acc_dists[datapath_id];
+    hls::vector<dist_t, VOICEHD_CLASSES> &acc_dists = s_acc_dists[datapath_id];
     hv_t query;
 
     // Encoding stage. Choose one option only!
     voicehd_enc_vertical_unroll(query, features, im, cim);
     //voicehd_enc_bnb(query, features, im, cim);
 
-    hls::vector<dim_t, VOICEHD_CLASSES> dists;
+    hls::vector<dist_t, VOICEHD_CLASSES> dists;
     bsc_distN<VOICEHD_CLASSES>(dists, query, am);
     acc_dists += dists;
 }
@@ -122,13 +122,13 @@ void voicehd_enc_seg(
         const hv_t (&am)[HV_SEGMENTS][VOICEHD_CLASSES]
         ) {
 
-    static hls::vector<dim_t, VOICEHD_CLASSES> s_acc_dists[SEGMENT_DATAPATHS];
+    static hls::vector<dist_t, VOICEHD_CLASSES> s_acc_dists[SEGMENT_DATAPATHS];
 
     // Clean-up accumulator banks
     // TODO: Maybe unroll this loop in tcl?
     ResetAccumulators:
     for (size_t i = 0; i < SEGMENT_DATAPATHS; i++) {
-        s_acc_dists[i] = static_cast<dim_t>(0);
+        s_acc_dists[i] = static_cast<dist_t>(0);
     }
 
     VoiceHD_Segment:
@@ -145,7 +145,7 @@ void voicehd_enc_seg(
     }
 
     // Accumulate dists of all datapaths
-    hls::vector<dim_t, VOICEHD_CLASSES> acc_dists = static_cast<dim_t>(0);
+    hls::vector<dist_t, VOICEHD_CLASSES> acc_dists = static_cast<dist_t>(0);
     VoiceHD_Dist_Accumulation:
     for (size_t dp = 0; dp < SEGMENT_DATAPATHS; dp++) {
         acc_dists += s_acc_dists[dp];
@@ -153,7 +153,7 @@ void voicehd_enc_seg(
 
     // Compute argmin of distances to predict correct class
     size_t argmin = 0;
-    dim_t val = acc_dists[0];
+    dist_t val = acc_dists[0];
     Argmin:
     for (size_t i = 1; i < acc_dists.size(); i++) {
         if (val > acc_dists[i]) {

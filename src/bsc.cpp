@@ -61,12 +61,12 @@ void bsc_bnb(
     }
 }
 
-void bsc_dist(dim_t &out, const hv_t &a, const hv_t &b) {
+void bsc_dist(dist_t &out, const hv_t &a, const hv_t &b) {
     hv_t temp = a^b;
     out = 0;
 
     AddReduce:
     for (size_t i = 0; i < a.size(); i++) {
-        out = out + static_cast<dim_t>(temp[i]);
+        out = out + static_cast<dist_t>(temp[i]);
     }
 }

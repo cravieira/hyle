@@ -125,8 +125,8 @@ void test_bnb() {
 void test_dist() {
     hv_t a =        {1, 0, 1, 0, 1, 1, 1, 1, 1, 1};
     hv_t b =        {0, 1, 0, 1, 1, 0, 0, 1, 1, 0};
-    dim_t out_gold = 7;
-    dim_t out = -1;
+    dist_t out_gold = 7;
+    dist_t out = -1;
 
     bsc_dist(out, a, b);
     if (out != out_gold) {
@@ -140,8 +140,8 @@ void test_distN() {
     hv_t q =        {1, 0, 1, 0, 1, 1, 1, 1, 1, 1};
     hv_t a =        {0, 1, 0, 1, 1, 0, 0, 1, 1, 0};
     hv_t b =        {1, 1, 1, 0, 1, 1, 0, 0, 0, 0};
-    hls::vector<dim_t, 2> out_gold = {7, 5};
-    hls::vector<dim_t, 2> out = static_cast<dim_t>(0);
+    hls::vector<dist_t, 2> out_gold = {7, 5};
+    hls::vector<dist_t, 2> out = static_cast<dist_t>(0);
     hv_t am[] = {a, b};
 
     bsc_distN(out, q, am);
