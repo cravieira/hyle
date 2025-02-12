@@ -26,7 +26,7 @@ constexpr bool is_pow2(size_t v) {
 }
 
 /**
- * @brief Parallel reset any matrix made of hls::vector
+ * @brief Parallel reset any matrix
  *
  * @tparam T Element data type
  * @tparam DIM1 Matrix dimension 1
@@ -34,11 +34,14 @@ constexpr bool is_pow2(size_t v) {
  * @param[inout] mat Matrix to be reset
  */
 template<typename T, size_t DIM1, size_t DIM2>
-void reset_hls_matrix(hls::vector<hls::vector<T, DIM2>, DIM1> &mat) {
-#pragma HLS inline
+void parallel_reset(T (&mat)[DIM1][DIM2]) {
+    #pragma HLS inline
 
     for (size_t i = 0; i < DIM1; i++) {
-    #pragma HLS unroll
-        mat[i] = static_cast<T>(0);
+        #pragma HLS unroll
+        for (size_t j = 0; j < DIM2; j++) {
+            #pragma HLS unroll
+            mat[i][j] = static_cast<T>(0);
+        }
     }
 }
