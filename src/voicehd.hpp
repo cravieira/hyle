@@ -18,6 +18,7 @@ using feat_t = uint32_t;
 
 using feat_vec_t = std::array<feat_t, VOICEHD_FEATURES>;
 
+// Prior attempts to design a VoiceHD top. Keep here for archiving purposes. Remove it later
 //void voicehd_top(
 //        class_t &pred,
 //        const std::array<feat_t, VOICEHD_FEATURES> &features

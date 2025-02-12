@@ -8,9 +8,6 @@
 
 template<size_t N>
 static void _read_mem(
-        //hv_t &out,
-        //const std::array<hv_t, N> &mem,
-        //size_t ind
         hv_t &out,
         const hv_t (&mem)[N],
         size_t ind
