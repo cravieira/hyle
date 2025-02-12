@@ -106,8 +106,8 @@ void test_bnb() {
     hv_t out;
     hv_t hvs[] = {a, b, c, d, e, f};
 
-    bnb_acc_bank_vec_t acc;
-    reset_hls_matrix(acc);
+    bnb_acc_t acc;
+    init_bnb_acc_t(acc);
 
     cgr_bnb(acc, a, b, acc);
     cgr_bnb(acc, c, d, acc);

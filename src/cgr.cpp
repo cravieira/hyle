@@ -1,5 +1,6 @@
 #include "cgr.hpp"
 
+#include <cstdint>
 #include <hls_vector.h>
 
 #ifndef __SYNTHESIS__
@@ -15,6 +16,8 @@ std::ostream& operator<<(std::ostream& os, const hv_t v) {
 }
 #endif
 
+void init_bnb_acc_t(bnb_acc_t &acc) { parallel_reset(acc); }
+
 void cgr_bind(hv_t &out, const hv_t &a, const hv_t &b) {
     out = a + b;
 }
@@ -23,29 +26,25 @@ void cgr_bundle(hv_t &out, const hv_t &a, const hv_t &b, const hv_t &c) {
     constexpr size_t acc_bits = 2;
     using acc_elem_t = ap_uint<acc_bits>;
     using acc_bank_t = hls::vector<acc_elem_t, __CGR_POINTS__>;
-    using acc_bank_vec_t = hls::vector<acc_bank_t, HV_SEGMENT_SIZE>;
 
-    acc_bank_vec_t acc_bank_vec;
+    bnb_acc_t acc_bank_vec;
     hv_t hvs[3] = {a, b, c};
 
-    AccVecReset:
-    for (int i = 0; i < acc_bank_vec.size(); i++) {
-#pragma HLS unroll
-        acc_bank_vec[i] = static_cast<acc_elem_t>(0);
-    }
+    init_bnb_acc_t(acc_bank_vec);
 
     CgrBundleVec:
     for (int v = 0; v < 3; v++) { // TODO: Maybe pipeline or unroll this loop
         CgrBundleVecElem:
         for (int e = 0; e < a.size(); e++) {
-#pragma HLS unroll
+            #pragma HLS unroll
             acc_bank_vec[e][hvs[v][e]]++;
         }
     }
 
     // Threshold to compute the bundled HV
-    for (int i = 0; i < acc_bank_vec.size(); i++) {
-#pragma HLS unroll
+    Threshold:
+    for (int i = 0; i < BNB_WIDTH; i++) {
+        #pragma HLS unroll
         // TODO: Maybe size_t could be optimized to return the exact amount of bits only
         size_t argmax;
         _parallel_argmax(argmax, acc_bank_vec[i]);
@@ -55,10 +54,10 @@ void cgr_bundle(hv_t &out, const hv_t &a, const hv_t &b, const hv_t &c) {
 
 void cgr_bnb_threshold(
         hv_t &out,
-        const bnb_acc_bank_vec_t &acc
+        const bnb_acc_t &acc
 ) {
     // Threshold to compute the bundled HV
-    for (int i = 0; i < acc.size(); i++) {
+    for (int i = 0; i < BNB_WIDTH; i++) {
 #pragma HLS unroll
         // TODO: Maybe size_t could be optimized to return the exact amount of bits only
         size_t argmax;
@@ -68,17 +67,25 @@ void cgr_bnb_threshold(
 }
 
 void cgr_bnb(
-        bnb_acc_bank_vec_t &acc_out,
+        bnb_acc_t &acc_out,
         const hv_t &a,
         const hv_t &b,
-        const bnb_acc_bank_vec_t &acc_in) {
+        const bnb_acc_t &acc_in) {
     hv_t temp;
     cgr_bind(temp, a, b);
 
     CgrBnbAcc:
-    for (int e = 0; e < temp.size(); e++) {
-#pragma HLS unroll
+    for (int e = 0; e < BNB_WIDTH; e++) {
+        #pragma HLS unroll
+        // One-line code
         acc_out[e][temp[e]] = acc_in[e][temp[e]]+1;
+
+        // Long code
+        //cgr_t ind_cgr = temp[e];
+        //uint32_t index = ind_cgr.to_uint();
+        //const bnb_acc_elem_t (&acc_bank)[BNB_HEIGHT] = acc_in[e];
+        //bnb_acc_elem_t current_value = acc_bank[index];
+        //acc_out[e][index] = current_value+1;
     }
 }
 
