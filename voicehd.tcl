@@ -5,6 +5,7 @@ set DIM 1000
 #set DIM 32768
 set SEGMENT_SIZE 1000
 set datapaths 1; # Number of parallel segment datapaths
+set vsa "bsc"
 
 if { $argc != 0 } {
     set datapaths [lindex $argv 0]
@@ -22,8 +23,8 @@ add_files -cflags ${cflags} -tb "src/voicehd_tb.cpp"
 add_files -cflags ${cflags} -tb "src/common.hpp"
 add_files -cflags ${cflags} -tb "src/defines.hpp"
 
-add_files -cflags ${cflags} "src/bsc.cpp"
-add_files -cflags ${cflags} "src/bsc.hpp"
+add_files -cflags ${cflags} "src/${vsa}.cpp"
+add_files -cflags ${cflags} "src/${vsa}.hpp"
 add_files -cflags ${cflags} "src/voicehd.cpp"
 add_files -cflags ${cflags} "src/voicehd.hpp"
 
@@ -37,11 +38,11 @@ set_directive_unroll -factor ${datapaths} voicehd_enc_seg/VoiceHD_Segment
 set_directive_array_partition voicehd_enc_seg s_acc_dists
 
 # Accelerator optimizations. Pick one!
-source tcl/voicehd_opt.tcl; # Vertical unrolled design
-#source tcl/voicehd_bnb.tcl; # Multi-cycle encoding with fused bind-and-bundle
+source tcl/voicehd_bsc_opt.tcl; # Vertical unrolled design
+#source tcl/voicehd_bsc_bnb.tcl; # Multi-cycle encoding with fused bind-and-bundle
 
-csim_design
-#csim_design -O
+#csim_design
+csim_design -O
 #csim_design -setup
 
 #csynth_design
