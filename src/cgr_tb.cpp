@@ -5,7 +5,8 @@
 #include <hls_vector.h>
 
 #include "cgr.hpp"
-#include "common.hpp"
+
+using namespace vsa::cgr;
 
 // Pretty printer for hls::vector
 template<typename T, size_t N>
@@ -24,7 +25,7 @@ void test_bind() {
     hv_t out_gold = {1, 0, 3, 2, 2, 0, 0, 3, 0, 1};
     hv_t out;
 
-    cgr_bind(out, a, b);
+    bind(out, a, b);
     if (out != out_gold) {
         std::cout << a << std::endl;
         std::cout << b << std::endl;
@@ -40,7 +41,7 @@ void test_bindN() {
     hv_t out;
     hv_t hvs[] = {a, b, c};
 
-    cgr_bindN(out, hvs);
+    bindN(out, hvs);
     if (out != out_gold) {
         std::cout << a << std::endl;
         std::cout << b << std::endl;
@@ -59,7 +60,7 @@ void test_bundle() {
     hv_t out_gold = {0, 1, 2, 3, 0, 1, 1, 1, 2, 3};
     hv_t out;
 
-    cgr_bundle(out, a, b, c);
+    bundle(out, a, b, c);
     if (out != out_gold) {
         std::cout << a << std::endl;
         std::cout << b << std::endl;
@@ -81,7 +82,7 @@ void test_bundleN() {
     hv_t out;
     hv_t hvs[] = {a, b, c, d, e, f, g, h};
 
-    cgr_bundleN(out, hvs);
+    bundleN(out, hvs);
     if (out != out_gold) {
         std::cout << a << std::endl;
         std::cout << b << std::endl;
@@ -109,10 +110,10 @@ void test_bnb() {
     bnb_acc_t acc;
     init_bnb_acc_t(acc);
 
-    cgr_bnb(acc, a, b, acc);
-    cgr_bnb(acc, c, d, acc);
-    cgr_bnb(acc, e, f, acc);
-    cgr_bnb_threshold(out, acc);
+    bnb(acc, a, b, acc);
+    bnb(acc, c, d, acc);
+    bnb(acc, e, f, acc);
+    bnb_threshold(out, acc);
 
     if (out != out_gold) {
         std::cout << a << std::endl;
@@ -131,7 +132,7 @@ void test_dist() {
     dist_t out_gold = 11;
     dist_t out = -1;
 
-    cgr_dist(out, a, b);
+    dist(out, a, b);
     if (out != out_gold) {
         std::cout << a << std::endl;
         std::cout << b << std::endl;
@@ -147,7 +148,7 @@ void test_distN() {
     hls::vector<dist_t, 2> out = static_cast<dist_t>(0);
     hv_t am[] = {a, b};
 
-    cgr_distN(out, q, am);
+    distN(out, q, am);
     if (out != out_gold) {
         std::cout << q << std::endl;
         std::cout << a << std::endl;
@@ -165,7 +166,7 @@ void test_search() {
     size_t out = -1;
     hv_t am[] = {a, b, c};
 
-    cgr_search(out, q, am);
+    search(out, q, am);
     if (out != out_gold) {
         std::cout << q << std::endl;
         std::cout << a << std::endl;

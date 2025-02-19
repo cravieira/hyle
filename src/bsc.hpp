@@ -8,9 +8,12 @@
 #include "common.hpp"
 #include "defines.hpp"
 
+namespace vsa {
+namespace bsc {
+
 // Type definitions
-using bin_t = ap_uint<1>;
-using hv_t = hls::vector<bin_t, HV_SEGMENT_SIZE>;
+using hv_elem_t = ap_uint<1>;
+using hv_t = hls::vector<hv_elem_t, HV_SEGMENT_SIZE>;
 // An uint big enough to store the number of dimensions
 using dim_t = ap_uint<number_of_bits(HV_SEGMENT_SIZE*HV_SEGMENTS)>;
 // An uint big enought to store the max distance between BSC HVs.
@@ -21,16 +24,18 @@ using bnb_acc_elem_t = ap_uint<10>; // TODO: This can later be optimized to fit
                                     // only the necessary bits in accumulation.
 using bnb_acc_t = hls::vector<bnb_acc_elem_t, HV_SEGMENT_SIZE>;
 
+void init_bnb_acc_t(bnb_acc_t &acc);
+
 // Non-member printer function for BSC hypervectors, i.e., hls::vector with
 // binary digits
 std::ostream& operator<<(std::ostream& os, const hv_t v);
 
 // BSC
 
-void bsc_bind(hv_t &out, const hv_t &a, const hv_t &b);
+void bind(hv_t &out, const hv_t &a, const hv_t &b);
 
 template<size_t N>
-void bsc_bindN(hv_t &out, const hv_t (&hvs)[N]) {
+void bindN(hv_t &out, const hv_t (&hvs)[N]) {
     static_assert(
             N > 2,
             "Number of vectors in \"hvs\" collection must be greater than 2");
@@ -42,10 +47,10 @@ void bsc_bindN(hv_t &out, const hv_t (&hvs)[N]) {
     }
 }
 
-void bsc_bundle(hv_t &out, const hv_t &a, const hv_t &b, const hv_t &c);
+void bundle(hv_t &out, const hv_t &a, const hv_t &b, const hv_t &c);
 
 template<size_t N>
-void bsc_bundleN(hv_t &out, const hv_t (&hvs)[N]) {
+void bundleN(hv_t &out, const hv_t (&hvs)[N]) {
     constexpr size_t acc_bits = number_of_bits(N);
     using acc_elem_t = ap_uint<acc_bits>;
 
@@ -61,27 +66,27 @@ void bsc_bundleN(hv_t &out, const hv_t (&hvs)[N]) {
 
         const acc_elem_t threshold(N/2);
         // The use of ">" instead of ">=" makes the results equal to TorchHD
-        bin_t bit = sum > threshold ? 1 : 0;
+        hv_elem_t bit = sum > threshold ? 1 : 0;
         out[col] = bit;
     }
 }
 
-void bsc_bnb_threshold(
+void bnb_threshold(
         hv_t &out,
         const bnb_acc_t &acc,
         const bnb_acc_elem_t &threshold);
 
-void bsc_bnb(
+void bnb(
         bnb_acc_t &acc_out,
         const hv_t &a,
         const hv_t &b,
         const bnb_acc_t &acc_in
 );
 
-void bsc_dist(dist_t &out, const hv_t &a, const hv_t &b);
+void dist(dist_t &out, const hv_t &a, const hv_t &b);
 
 template<size_t N>
-void bsc_distN(
+void distN(
         hls::vector<dist_t, N> &dists,
         const hv_t &query,
         const hv_t (&am)[N]
@@ -92,12 +97,12 @@ void bsc_distN(
 
     ComputeDist:
     for (size_t i = 0; i < N; i++) {
-        bsc_dist(dists[i], query, am[i]);
+        dist(dists[i], query, am[i]);
     }
 }
 
 template<size_t N>
-void bsc_search(
+void search(
         size_t &argmin,
         const hv_t &query,
         const hv_t (&am)[N]
@@ -108,7 +113,7 @@ void bsc_search(
     // Revisit this function implementation when optimizing code.
 
     hls::vector<dist_t, N> dists = static_cast<dist_t>(0); // TODO: Should this buffer be static?
-    bsc_distN(dists, query, am);
+    distN(dists, query, am);
 
     //using ind_t = ap_uint<number_of_bits(N)>;
     argmin = 0;
@@ -121,3 +126,7 @@ void bsc_search(
         }
     }
 }
+
+}
+}
+

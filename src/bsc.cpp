@@ -1,6 +1,10 @@
 #include "bsc.hpp"
 #include <cstddef>
 
+using namespace vsa::bsc;
+namespace vsa {
+namespace bsc {
+
 #ifndef __SYNTHESIS__
 // Non-member printer function for BSC hypervectors, i.e., hls::vector with
 // binary digits
@@ -14,11 +18,13 @@ std::ostream& operator<<(std::ostream& os, const hv_t v) {
 }
 #endif
 
-void bsc_bind(hv_t &out, const hv_t &a, const hv_t &b) {
+void init_bnb_acc_t(bnb_acc_t &acc) { acc = static_cast<bnb_acc_elem_t>(0); }
+
+void bind(hv_t &out, const hv_t &a, const hv_t &b) {
     out = a ^ b;
 }
 
-void bsc_bundle(hv_t &out, const hv_t &a, const hv_t &b, const hv_t &c) {
+void bundle(hv_t &out, const hv_t &a, const hv_t &b, const hv_t &c) {
     //hls::vector<ap_uint<32>, 4> y = static_cast<ap_uint<32>>(10);
     constexpr size_t acc_bits = 2;
     using acc_elem_t = ap_uint<acc_bits>;
@@ -32,22 +38,22 @@ void bsc_bundle(hv_t &out, const hv_t &a, const hv_t &b, const hv_t &c) {
         acc_elem_t sum = t_a + t_b + t_c;
 
         // Get the MSB of the sum. This should be equivalent to the thresholding
-        out[i] = static_cast<bin_t>(sum[acc_bits-1]);
+        out[i] = static_cast<hv_elem_t>(sum[acc_bits-1]);
     }
 }
 
-void bsc_bnb_threshold(
+void bnb_threshold(
         hv_t &out,
         const bnb_acc_t &acc,
         const bnb_acc_elem_t &threshold) {
     BscBnbThreshold:
     for (size_t i = 0; i < acc.size(); i++) {
-        bin_t bit = acc[i] > threshold;
+        hv_elem_t bit = acc[i] > threshold;
         out[i] = bit;
     }
 }
 
-void bsc_bnb(
+void bnb(
         bnb_acc_t &acc_out,
         const hv_t &a,
         const hv_t &b,
@@ -61,7 +67,7 @@ void bsc_bnb(
     }
 }
 
-void bsc_dist(dist_t &out, const hv_t &a, const hv_t &b) {
+void dist(dist_t &out, const hv_t &a, const hv_t &b) {
     hv_t temp = a^b;
     out = 0;
 
@@ -70,3 +76,7 @@ void bsc_dist(dist_t &out, const hv_t &a, const hv_t &b) {
         out = out + static_cast<dist_t>(temp[i]);
     }
 }
+
+}
+}
+

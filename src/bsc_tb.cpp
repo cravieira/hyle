@@ -6,6 +6,8 @@
 
 #include "bsc.hpp"
 
+using namespace vsa::bsc;
+
 // Pretty printer for hls::vector
 template<typename T, size_t N>
 std::ostream& operator<<(std::ostream& os, const hls::vector<T, N> c) {
@@ -23,7 +25,7 @@ void test_bind() {
     hv_t out_gold = {1, 1, 1, 1, 0, 1, 1, 0, 0, 1};
     hv_t out;
 
-    bsc_bind(out, a, b);
+    bind(out, a, b);
     if (out != out_gold) {
         std::cout << a << std::endl;
         std::cout << b << std::endl;
@@ -39,7 +41,7 @@ void test_bindN() {
     hv_t out;
     hv_t hvs[] = {a, b, c};
 
-    bsc_bindN(out, hvs);
+    bindN(out, hvs);
     if (out != out_gold) {
         std::cout << a << std::endl;
         std::cout << b << std::endl;
@@ -55,7 +57,7 @@ void test_bundle() {
     hv_t out_gold = {0, 1, 0, 1, 1, 0, 0, 1, 1, 0};
     hv_t out;
 
-    bsc_bundle(out, a, b, c);
+    bundle(out, a, b, c);
     if (out != out_gold) {
         std::cout << a << std::endl;
         std::cout << b << std::endl;
@@ -78,7 +80,7 @@ void test_bundleN() {
     hv_t out;
     hv_t hvs[] = {a, b, c, d, e, f, g, h, i};
 
-    bsc_bundleN(out, hvs);
+    bundleN(out, hvs);
     if (out != out_gold) {
         std::cout << a << std::endl;
         std::cout << b << std::endl;
@@ -105,10 +107,10 @@ void test_bnb() {
     hv_t hvs[] = {a, b, c, d, e, f};
 
     bnb_acc_t acc = static_cast<bnb_acc_elem_t>(0);
-    bsc_bnb(acc, a, b, acc);
-    bsc_bnb(acc, c, d, acc);
-    bsc_bnb(acc, e, f, acc);
-    bsc_bnb_threshold(out, acc, 1);
+    bnb(acc, a, b, acc);
+    bnb(acc, c, d, acc);
+    bnb(acc, e, f, acc);
+    bnb_threshold(out, acc, 1);
 
     if (out != out_gold) {
         std::cout << a << std::endl;
@@ -128,7 +130,7 @@ void test_dist() {
     dist_t out_gold = 7;
     dist_t out = -1;
 
-    bsc_dist(out, a, b);
+    dist(out, a, b);
     if (out != out_gold) {
         std::cout << a << std::endl;
         std::cout << b << std::endl;
@@ -144,7 +146,7 @@ void test_distN() {
     hls::vector<dist_t, 2> out = static_cast<dist_t>(0);
     hv_t am[] = {a, b};
 
-    bsc_distN(out, q, am);
+    distN(out, q, am);
     if (out != out_gold) {
         std::cout << q << std::endl;
         std::cout << a << std::endl;
@@ -162,7 +164,7 @@ void test_search() {
     size_t out = -1;
     hv_t am[] = {a, b, c};
 
-    bsc_search(out, q, am);
+    search(out, q, am);
     if (out != out_gold) {
         std::cout << q << std::endl;
         std::cout << a << std::endl;

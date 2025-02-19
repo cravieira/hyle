@@ -20,15 +20,17 @@ static_assert(
         "Define __CGR_POINTS__ is not a power of 2!"
         );
 
+namespace vsa {
+namespace cgr {
+
 constexpr size_t _cgr_bits_per_dim = number_of_bits(__CGR_POINTS__-1);
-using cgr_t = ap_uint<number_of_bits(_cgr_bits_per_dim)>;
-using hv_t = hls::vector<cgr_t, HV_SEGMENT_SIZE>;
+using hv_elem_t = ap_uint<number_of_bits(_cgr_bits_per_dim)>;
+using hv_t = hls::vector<hv_elem_t, HV_SEGMENT_SIZE>;
 // An uint big enough to store the number of dimensions used in the application.
 using dim_t = ap_uint<number_of_bits(DIM)>;
-// An uint big enough to store the maximal distance between CGR HVs. TODO: Maybe
-// this could be fine tuned and the number of bits reduced since the maximal
+// An uint big enough to store the maximal distance between CGR HVs. The maximal
 // distance between CGR elements is #CGR_POINTS/2.
-using dist_t = ap_uint<number_of_bits(DIM*_cgr_bits_per_dim)>;
+using dist_t = ap_uint<number_of_bits(DIM*(__CGR_POINTS__/2))>;
 
 // Special types used for the "Bind and Bundle" operator
 // TODO: This can later be optimized to fit only the necessary bits in accumulation.
@@ -48,10 +50,10 @@ std::ostream& operator<<(std::ostream& os, const hv_t v);
 
 // CGR
 
-void cgr_bind(hv_t &out, const hv_t &a, const hv_t &b);
+void bind(hv_t &out, const hv_t &a, const hv_t &b);
 
 template<size_t N>
-void cgr_bindN(hv_t &out, const hv_t (&hvs)[N]) {
+void bindN(hv_t &out, const hv_t (&hvs)[N]) {
     static_assert(
             N > 2,
             "Number of vectors in \"hvs\" collection must be greater than 2");
@@ -63,10 +65,10 @@ void cgr_bindN(hv_t &out, const hv_t (&hvs)[N]) {
     }
 }
 
-void cgr_bundle(hv_t &out, const hv_t &a, const hv_t &b, const hv_t &c);
+void bundle(hv_t &out, const hv_t &a, const hv_t &b, const hv_t &c);
 
 template<size_t N>
-void cgr_bundleN(hv_t &out, const hv_t (&hvs)[N]) {
+void bundleN(hv_t &out, const hv_t (&hvs)[N]) {
     constexpr size_t acc_bits = number_of_bits(N);
     using acc_elem_t = ap_uint<acc_bits>;
     using acc_bank_t = hls::vector<acc_elem_t, __CGR_POINTS__>;
@@ -93,34 +95,34 @@ void cgr_bundleN(hv_t &out, const hv_t (&hvs)[N]) {
     }
 }
 
-void cgr_bnb_threshold(
+void bnb_threshold(
         hv_t &out,
         const bnb_acc_t &acc
 );
 
-void cgr_bnb(
+void bnb(
         bnb_acc_t &acc_out,
         const hv_t &a,
         const hv_t &b,
         const bnb_acc_t &acc_in
 );
 
-void cgr_dist(dist_t &out, const hv_t &a, const hv_t &b);
+void dist(dist_t &out, const hv_t &a, const hv_t &b);
 
 template<size_t N>
-void cgr_distN(
+void distN(
         hls::vector<dist_t, N> &dists,
         const hv_t &query,
         const hv_t (&am)[N]
         ) {
     ComputeDist:
     for (size_t i = 0; i < N; i++) {
-        cgr_dist(dists[i], query, am[i]);
+        dist(dists[i], query, am[i]);
     }
 }
 
 template<size_t N>
-void cgr_search(
+void search(
         size_t &argmin,
         const hv_t &query,
         const hv_t (&am)[N]
@@ -131,7 +133,7 @@ void cgr_search(
     // Revisit this function implementation when optimizing code.
 
     hls::vector<dist_t, N> dists = static_cast<dist_t>(0);
-    cgr_distN(dists, query, am);
+    distN(dists, query, am);
 
     argmin = 0;
     dist_t val = dists[0];
@@ -142,4 +144,7 @@ void cgr_search(
             argmin = i;
         }
     }
+}
+
+}
 }
