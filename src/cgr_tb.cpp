@@ -144,16 +144,16 @@ void test_distN() {
     hv_t q = {2, 1, 3, 0, 2, 1, 3, 0, 2, 2};
     hv_t a = {0, 1, 2, 3, 0, 1, 2, 3, 0, 1};
     hv_t b = {2, 3, 0, 1, 1, 2, 3, 2, 2, 0};
-    hls::vector<dist_t, 2> out_gold = {11, 10};
-    hls::vector<dist_t, 2> out = static_cast<dist_t>(0);
+    dist_t out_gold[2] = {11, 10};
+    dist_t out[2];
     hv_t am[] = {a, b};
 
     distN(out, q, am);
-    if (out != out_gold) {
+    if (out[0] != out_gold[0] || out[1] != out_gold[1]) {
         std::cout << q << std::endl;
         std::cout << a << std::endl;
         std::cout << b << std::endl;
-        std::cout << out << " != " << out_gold << std::endl;
+        std::cout << out[0] << ", " << out[1] << " != " << out_gold[0] << ", " << out_gold[1] << std::endl;
     };
 }
 

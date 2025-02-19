@@ -26,6 +26,23 @@ constexpr bool is_pow2(size_t v) {
 }
 
 /**
+ * @brief Parallel reset any array
+ *
+ * @tparam T Element data type
+ * @tparam DIM1 Array dimension
+ * @param[inout] v Array to be reset
+ */
+template<typename T, size_t DIM1>
+void parallel_reset(T (&arr)[DIM1]) {
+    #pragma HLS inline
+
+    for (size_t i = 0; i < DIM1; i++) {
+        #pragma HLS unroll
+        arr[i] = static_cast<T>(0);
+    }
+}
+
+/**
  * @brief Parallel reset any matrix
  *
  * @tparam T Element data type

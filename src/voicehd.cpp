@@ -8,6 +8,8 @@
 #include <cstddef>
 #include <cstdint>
 
+using dist_bank_t = dist_t[VOICEHD_CLASSES];
+
 template<size_t N, typename HV_T>
 static void _read_mem(
         HV_T &out,
@@ -139,19 +141,22 @@ void voicehd_enc_seg_dp(
         const hv_t (&cim)[VOICEHD_LEVELS],
         const hv_t (&am)[VOICEHD_CLASSES],
         size_t datapath_id,
-        hls::vector<dist_t, VOICEHD_CLASSES> (&s_acc_dists)[SEGMENT_DATAPATHS]
+        dist_bank_t (&s_acc_dists)[SEGMENT_DATAPATHS]
         ) {
 
-    hls::vector<dist_t, VOICEHD_CLASSES> &acc_dists = s_acc_dists[datapath_id];
+    dist_bank_t &acc_dists = s_acc_dists[datapath_id];
     hv_t query;
 
     // Encoding stage. Choose one option only!
     //voicehd_enc_vertical_unroll(query, features, im, cim);
     voicehd_enc_bnb(query, features, im, cim);
 
-    hls::vector<dist_t, VOICEHD_CLASSES> dists;
+    dist_bank_t dists;
     distN<VOICEHD_CLASSES>(dists, query, am);
-    acc_dists += dists;
+    for (int i = 0; i < VOICEHD_CLASSES; i++) {
+        #pragma HLS unroll
+        acc_dists[i] += dists[i];
+    }
 }
 
 void voicehd_enc_seg(
@@ -162,14 +167,10 @@ void voicehd_enc_seg(
         const hv_t (&am)[HV_SEGMENTS][VOICEHD_CLASSES]
         ) {
 
-    static hls::vector<dist_t, VOICEHD_CLASSES> s_acc_dists[SEGMENT_DATAPATHS];
+    static dist_bank_t (s_acc_dists)[SEGMENT_DATAPATHS];
 
     // Clean-up accumulator banks
-    // TODO: Maybe unroll this loop in tcl?
-    ResetAccumulators:
-    for (size_t i = 0; i < SEGMENT_DATAPATHS; i++) {
-        s_acc_dists[i] = static_cast<dist_t>(0);
-    }
+    parallel_reset(s_acc_dists);
 
     VoiceHD_Segment:
     for (size_t s = 0; s < HV_SEGMENTS; s++) {
@@ -185,11 +186,15 @@ void voicehd_enc_seg(
     }
 
     // Accumulate dists of all datapaths
-    hls::vector<dist_t, VOICEHD_CLASSES> acc_dists = static_cast<dist_t>(0);
+    dist_bank_t acc_dists;
+    parallel_reset(acc_dists);
     VoiceHD_Dist_Accumulation:
     for (size_t dp = 0; dp < SEGMENT_DATAPATHS; dp++) {
         //#pragma HLS unroll // It does no seems to be advantageous to unroll this loop for small DPs
-        acc_dists += s_acc_dists[dp];
+        for (size_t i = 0; i < VOICEHD_CLASSES; i++) {
+            #pragma HLS unroll
+            acc_dists[i] += s_acc_dists[dp][i];
+        }
     }
 
     size_t argmin;

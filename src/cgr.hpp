@@ -111,7 +111,7 @@ void dist(dist_t &out, const hv_t &a, const hv_t &b);
 
 template<size_t N>
 void distN(
-        hls::vector<dist_t, N> &dists,
+        dist_t (&dists)[N],
         const hv_t &query,
         const hv_t (&am)[N]
         ) {
@@ -132,7 +132,7 @@ void search(
     // an optimized design, but it is the easiest implementation at the moment.
     // Revisit this function implementation when optimizing code.
 
-    hls::vector<dist_t, N> dists = static_cast<dist_t>(0);
+    dist_t dists[N];
     distN(dists, query, am);
 
     argmin = 0;
