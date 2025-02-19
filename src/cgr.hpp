@@ -46,37 +46,6 @@ void init_bnb_acc_t(bnb_acc_t &acc);
 // binary digits
 std::ostream& operator<<(std::ostream& os, const hv_t v);
 
-// Auxiliary functions
-template<typename T, size_t N>
-static void _parallel_argmax(size_t &argmax, const hls::vector<T, N> &vec) {
-    #pragma HLS inline
-    argmax = 0;
-    T val = vec[0];
-    Argmax:
-    for (size_t i = 0; i < N; i++) {
-#pragma HLS unroll
-        if (vec[i] > val) {
-            val = vec[i];
-            argmax = i;
-        }
-    }
-}
-
-template<typename T, size_t N>
-static void _parallel_argmax(size_t &argmax, const T (&vec)[N]) {
-    #pragma HLS inline
-    argmax = 0;
-    T val = vec[0];
-    Argmax:
-    for (size_t i = 0; i < N; i++) {
-#pragma HLS unroll
-        if (vec[i] > val) {
-            val = vec[i];
-            argmax = i;
-        }
-    }
-}
-
 // CGR
 
 void cgr_bind(hv_t &out, const hv_t &a, const hv_t &b);
@@ -119,7 +88,7 @@ void cgr_bundleN(hv_t &out, const hv_t (&hvs)[N]) {
         #pragma HLS unroll
         // TODO: Maybe size_t could be optimized to return the exact amount of bits only
         size_t argmax;
-        _parallel_argmax(argmax, acc_bank_vec[i]);
+        parallel_argmax(argmax, acc_bank_vec[i]);
         out[i] = argmax;
     }
 }

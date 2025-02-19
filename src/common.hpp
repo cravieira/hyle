@@ -45,3 +45,63 @@ void parallel_reset(T (&mat)[DIM1][DIM2]) {
         }
     }
 }
+
+template<typename T, size_t N>
+void parallel_argmax(size_t &ret, const hls::vector<T, N> &vec) {
+    #pragma HLS inline
+    ret = 0;
+    T val = vec[0];
+    Argmax:
+    for (size_t i = 0; i < N; i++) {
+        #pragma HLS unroll
+        if (vec[i] > val) {
+            val = vec[i];
+            ret = i;
+        }
+    }
+}
+
+template<typename T, size_t N>
+void parallel_argmax(size_t &ret, const T (&vec)[N]) {
+    #pragma HLS inline
+    ret = 0;
+    T val = vec[0];
+    Argmax:
+    for (size_t i = 0; i < N; i++) {
+        #pragma HLS unroll
+        if (vec[i] > val) {
+            val = vec[i];
+            ret = i;
+        }
+    }
+}
+
+template<typename T, size_t N>
+void parallel_argmin(size_t &ret, const hls::vector<T, N> &vec) {
+    #pragma HLS inline
+    ret = 0;
+    T val = vec[0];
+    Argmax:
+    for (size_t i = 0; i < N; i++) {
+        #pragma HLS unroll
+        if (vec[i] < val) {
+            val = vec[i];
+            ret = i;
+        }
+    }
+}
+
+template<typename T, size_t N>
+void parallel_argmin(size_t &ret, const T (&vec)[N]) {
+    #pragma HLS inline
+    ret = 0;
+    T val = vec[0];
+    Argmax:
+    for (size_t i = 0; i < N; i++) {
+        #pragma HLS unroll
+        if (vec[i] < val) {
+            val = vec[i];
+            ret = i;
+        }
+    }
+}

@@ -47,7 +47,7 @@ void cgr_bundle(hv_t &out, const hv_t &a, const hv_t &b, const hv_t &c) {
         #pragma HLS unroll
         // TODO: Maybe size_t could be optimized to return the exact amount of bits only
         size_t argmax;
-        _parallel_argmax(argmax, acc_bank_vec[i]);
+        parallel_argmax(argmax, acc_bank_vec[i]);
         out[i] = argmax;
     }
 }
