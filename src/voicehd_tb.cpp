@@ -8,7 +8,6 @@
 #include <string>
 #include <stdexcept>
 
-#include "bsc.hpp"
 #include "defines.hpp"
 #include "voicehd.hpp"
 
@@ -88,7 +87,7 @@ std::vector<hv_t> read_mem(
         }
 
         for (size_t i = 0; i < DIM; i++) {
-            hv[i] = static_cast<bin_t>(buffer[i]);
+            hv[i] = static_cast<hv_elem_t>(buffer[i]);
         }
 
         mem.emplace_back(hv);
@@ -116,7 +115,7 @@ std::array<hv_t, N> init_mem(const std::string &path) {
 }
 
 // HV memory type. Types used for memory file handling
-using mem_data_t = std::vector<std::vector<bin_t>>;
+using mem_data_t = std::vector<std::vector<hv_elem_t>>;
 
 mem_data_t parse_mem_file(const std::string &path) {
     std::ifstream f(path);
@@ -128,10 +127,10 @@ mem_data_t parse_mem_file(const std::string &path) {
     std::string line;
     while (std::getline(f, line)) {
         int i;
-        std::vector<bin_t> buffer;
+        std::vector<hv_elem_t> buffer;
         std::stringstream ss(line);
         while (ss >> i) {
-            buffer.emplace_back(static_cast<bin_t>(i));
+            buffer.emplace_back(static_cast<hv_elem_t>(i));
             if (ss.peek() == ',') {
                 ss.ignore();
             }
@@ -143,7 +142,7 @@ mem_data_t parse_mem_file(const std::string &path) {
 }
 
 template<size_t N>
-void segment_mem(const mem_data_t &parsed_mem, hv_t reshaped_mem[HV_SEGMENTS][N]) {
+void segment_mem(const mem_data_t &parsed_mem, hv_t (&reshaped_mem)[HV_SEGMENTS][N]) {
     const size_t expected_hv_size = HV_SEGMENTS*HV_SEGMENT_SIZE;
 
     for (size_t s = 0; s < HV_SEGMENTS; s++) {
