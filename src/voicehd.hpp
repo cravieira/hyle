@@ -23,8 +23,8 @@ const size_t VOICEHD_CLASSES = 26;
 const size_t VOICEHD_FEATURES = 617;
 const size_t VOICEHD_LEVELS = 10;
 //using class_t = ap_uint<number_of_bits(VOICEHD_CLASSES)>;
-using class_t = uint32_t;
-using feat_t = uint32_t;
+using class_t = uint8_t;
+using feat_t = uint8_t;
 
 using feat_vec_t = std::array<feat_t, VOICEHD_FEATURES>;
 

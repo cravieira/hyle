@@ -46,7 +46,7 @@ add_files -cflags ${cflags} "src/voicehd.cpp"
 
 set_top voicehd_enc_seg
 open_solution "solution1"
-set_part  {xc7z020clg400-1}
+set_part  {xczu7ev-ffvf1517-3-e}
 create_clock -period 10
 
 # voicehd_enc_seg_dp() #
