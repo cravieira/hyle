@@ -1,53 +1,49 @@
+source tcl/common.tcl
+
 set DIM 32
-set SEGMENT_SIZE ${DIM}
-set datapaths 1; # Number of parallel segment datapaths
-set vsa "bsc"; # vsa = bsc|cgr
-set valid_vsa {"bsc" "cgr"}
-set operation "bnb32"; # operation = bind|bnb_32|dist
-set valid_operation {"bind" "bnb32" "dist"}
-
-if { $argc != 0 } {
-    set datapaths [lindex $argv 0]
-}
-
-puts "Using ${datapaths} datapaths"
-puts "argv ${argv} argc ${argc}"
-
-set SEGMENTS [expr $DIM / $SEGMENT_SIZE]
 set CGR_POINTS 4
+set VSA "cgr"; # VSA = bsc|cgr
+set OPERATION "bind"; # OPERATION = bind|bnb_32|dist
+
+# Is there a custom parameter file?
+if {$argc == 1} {
+    source [lindex $argv 0]
+}
+set valid_vsa {"bsc" "cgr"}
+set valid_operation {"bind" "bnb32" "dist"}
+set datapaths 1; # Number of parallel segment datapaths
+
+com_assert_in $VSA $valid_vsa
+com_assert_in $OPERATION $valid_operation
+
+set SEGMENT_SIZE ${DIM}
+set SEGMENTS [expr $DIM / $SEGMENT_SIZE]
+
 set cflags "-D__HV_DIMENSIONS__=${DIM} -D__HV_SEGMENT_SIZE__=${SEGMENT_SIZE} -D__SEGMENT_DATAPATHS__=${datapaths} -D__CGR_POINTS__=${CGR_POINTS} -Isrc"
 
-if { ${vsa} == "bsc"} {
-    set model_name "${vsa}"
-} elseif { ${vsa} == "cgr" } {
-    set model_name "${vsa}${CGR_POINTS}"
-} else {
-    puts "Invalid VSA class: \"${vsa}\""
-    exit 1
+if { ${VSA} == "bsc"} {
+    set model_name "${VSA}"
+} elseif { ${VSA} == "cgr" } {
+    set model_name "${VSA}${CGR_POINTS}"
 }
 
-if {[lsearch -exact $valid_operation $operation] == -1} {
-    puts "Invalid operation: \"${operation}\""
-    exit 1
-}
-
-open_project "vitis_bench-${model_name}-${operation}-d${DIM}-seg_size${SEGMENT_SIZE}-dp${datapaths}" -reset
+open_project "vitis_bench-${model_name}-${OPERATION}-d${DIM}" -reset
+#open_project "vitis_bench-${model_name}-${OPERATION}-d${DIM}"
 
 add_files -cflags ${cflags} -tb "src/common.hpp"
 add_files -cflags ${cflags} -tb "src/defines.hpp"
 
-add_files -cflags ${cflags} "src/${vsa}.cpp"
-add_files -cflags ${cflags} "src/${vsa}.hpp"
-add_files -cflags ${cflags} "benchmark/bench_${vsa}.cpp"
-
+add_files -cflags ${cflags} "src/${VSA}.cpp"
+add_files -cflags ${cflags} "src/${VSA}.hpp"
+add_files -cflags ${cflags} "benchmark/bench_${VSA}.cpp"
 
 open_solution "solution1"
-set_part  {xc7z020clg400-1}
+set_part  {xczu7ev-ffvf1517-3-e}
 create_clock -period 10
 
-set_top ${vsa}_${operation}
+set_top ${VSA}_${OPERATION}
 
-if {$vsa == "bsc"} {
+if {$VSA == "bsc"} {
     # bundle
     set_directive_unroll bsc_bundle/MajColumn; # Unroll parallel dimensions in a segment (horizontal)
 
@@ -60,7 +56,7 @@ if {$vsa == "bsc"} {
     set_directive_unroll bsc_dist/AddReduce
 }
 
-if {$vsa == "cgr"} {
+if {$VSA == "cgr"} {
     # bundle
     set_directive_unroll cgr_bundle/AccVecReset
     set_directive_unroll cgr_bundle/CgrBundleVec
@@ -73,7 +69,7 @@ if {$vsa == "cgr"} {
     set_directive_inline cgr_bnb_threshold
     set_directive_inline cgr_bnb
     set_directive_inline init_bnb_acc_t
-    set_directive_array_partition -dim 1 cgr_bnb_32 bundle_acc
+    set_directive_array_partition -dim 1 cgr_bnb32 bundle_acc
 
     # dist
     set_directive_unroll cgr_dist/AddReduce
@@ -81,5 +77,6 @@ if {$vsa == "cgr"} {
 
 csynth_design
 
-export_design -flow syn
+#export_design -flow syn
+export_design -flow impl
 
