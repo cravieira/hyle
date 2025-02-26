@@ -3,8 +3,10 @@
 #include <cstdint>
 #include <hls_vector.h>
 
-namespace vsa {
-namespace cgr {
+// Since every type is aliased in cgr.hpp, with the line below it is possible to
+// use types defined in "vsa::cgr" instead of the long non-namespaced type name.
+// Thus, "hv_t" can be used instead of "cgr_hv_t".
+using namespace vsa::cgr;
 
 #ifndef __SYNTHESIS__
 // Non-member printer function for CGR hypervectors, i.e., hls::vector with
@@ -19,13 +21,13 @@ std::ostream& operator<<(std::ostream& os, const hv_t v) {
 }
 #endif
 
-void init_bnb_acc_t(bnb_acc_t &acc) { parallel_reset(acc); }
+void cgr_init_bnb_acc_t(bnb_acc_t &acc) { parallel_reset(acc); }
 
-void bind(hv_t &out, const hv_t &a, const hv_t &b) {
+void cgr_bind(hv_t &out, const hv_t &a, const hv_t &b) {
     out = a + b;
 }
 
-void bundle(hv_t &out, const hv_t &a, const hv_t &b, const hv_t &c) {
+void cgr_bundle(hv_t &out, const hv_t &a, const hv_t &b, const hv_t &c) {
     constexpr size_t acc_bits = 2;
     using acc_elem_t = ap_uint<acc_bits>;
     using acc_bank_t = hls::vector<acc_elem_t, __CGR_POINTS__>;
@@ -55,7 +57,7 @@ void bundle(hv_t &out, const hv_t &a, const hv_t &b, const hv_t &c) {
     }
 }
 
-void bnb_threshold(
+void cgr_bnb_threshold(
         hv_t &out,
         const bnb_acc_t &acc
 ) {
@@ -69,7 +71,7 @@ void bnb_threshold(
     }
 }
 
-void bnb(
+void cgr_bnb(
         bnb_acc_t &acc_out,
         const hv_t &a,
         const hv_t &b,
@@ -92,7 +94,7 @@ void bnb(
     }
 }
 
-void dist(dist_t &out, const hv_t &a, const hv_t &b) {
+void cgr_dist(dist_t &out, const hv_t &a, const hv_t &b) {
     hv_t t1 = a-b;
     hv_t t2 = b-a;
     out = 0;
@@ -102,8 +104,5 @@ void dist(dist_t &out, const hv_t &a, const hv_t &b) {
         hv_elem_t min = t1[i] < t2[i] ? t1[i] : t2[i];
         out = out + static_cast<dist_t>(min);
     }
-}
-
-}
 }
 

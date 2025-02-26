@@ -5,6 +5,8 @@
 
 constexpr size_t NUM_HVS = 32;
 
+using namespace vsa::cgr;
+
 void cgr_bnb32(
         hv_t &out,
         const hv_t (&im1)[NUM_HVS],
@@ -14,8 +16,8 @@ void cgr_bnb32(
     init_bnb_acc_t(bundle_acc);
     BnbLoop:
     for (int i = 0; i < NUM_HVS; i++) {
-        cgr_bnb(bundle_acc, im1[i], im2[i], bundle_acc);
+        bnb(bundle_acc, im1[i], im2[i], bundle_acc);
     }
-    cgr_bnb_threshold(out, bundle_acc);
+    bnb_threshold(out, bundle_acc);
 }
 
