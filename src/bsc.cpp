@@ -2,8 +2,6 @@
 #include <cstddef>
 
 using namespace vsa::bsc;
-namespace vsa {
-namespace bsc {
 
 #ifndef __SYNTHESIS__
 // Non-member printer function for BSC hypervectors, i.e., hls::vector with
@@ -18,13 +16,13 @@ std::ostream& operator<<(std::ostream& os, const hv_t v) {
 }
 #endif
 
-void init_bnb_acc_t(bnb_acc_t &acc) { acc = static_cast<bnb_acc_elem_t>(0); }
+void bsc_init_bnb_acc_t(bnb_acc_t &acc) { acc = static_cast<bnb_acc_elem_t>(0); }
 
-void bind(hv_t &out, const hv_t &a, const hv_t &b) {
+void bsc_bind(hv_t &out, const hv_t &a, const hv_t &b) {
     out = a ^ b;
 }
 
-void bundle(hv_t &out, const hv_t &a, const hv_t &b, const hv_t &c) {
+void bsc_bundle(hv_t &out, const hv_t &a, const hv_t &b, const hv_t &c) {
     //hls::vector<ap_uint<32>, 4> y = static_cast<ap_uint<32>>(10);
     constexpr size_t acc_bits = 2;
     using acc_elem_t = ap_uint<acc_bits>;
@@ -42,7 +40,7 @@ void bundle(hv_t &out, const hv_t &a, const hv_t &b, const hv_t &c) {
     }
 }
 
-void bnb_threshold(
+void bsc_bnb_threshold(
         hv_t &out,
         const bnb_acc_t &acc,
         const bnb_acc_elem_t &threshold) {
@@ -53,7 +51,7 @@ void bnb_threshold(
     }
 }
 
-void bnb(
+void bsc_bnb(
         bnb_acc_t &acc_out,
         const hv_t &a,
         const hv_t &b,
@@ -67,7 +65,7 @@ void bnb(
     }
 }
 
-void dist(dist_t &out, const hv_t &a, const hv_t &b) {
+void bsc_dist(dist_t &out, const hv_t &a, const hv_t &b) {
     hv_t temp = a^b;
     out = 0;
 
@@ -75,8 +73,5 @@ void dist(dist_t &out, const hv_t &a, const hv_t &b) {
     for (size_t i = 0; i < a.size(); i++) {
         out = out + static_cast<dist_t>(temp[i]);
     }
-}
-
-}
 }
 

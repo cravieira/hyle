@@ -5,6 +5,8 @@
 
 constexpr size_t NUM_HVS = 32;
 
+using namespace vsa::bsc;
+
 void bsc_bnb_32(
         hv_t &out,
         const hv_t (&im1)[NUM_HVS],
