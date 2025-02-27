@@ -77,7 +77,7 @@ void cgr_bnb(
         const hv_t &b,
         const bnb_acc_t &acc_in) {
     hv_t temp;
-    bind(temp, a, b);
+    cgr_bind(temp, a, b);
 
     CgrBnbAcc:
     for (int e = 0; e < BNB_WIDTH; e++) {
