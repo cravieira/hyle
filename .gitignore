@@ -2,3 +2,5 @@
 *vim
 vitis_hls.log
 vitis_*
+*.csv*
+_*
