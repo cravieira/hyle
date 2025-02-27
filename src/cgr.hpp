@@ -31,17 +31,20 @@ using cgr_dist_t = ap_uint<number_of_bits(DIM*(__CGR_POINTS__/2))>;
 
 // Special types used for the "Bind and Bundle" operator
 // TODO: This can later be optimized to fit only the necessary bits in accumulation.
-using cgr_bnb_acc_elem_t = ap_uint<10>;
+template<size_t Width>
+using cgr_bnb_acc_elem_t = ap_uint<Width>;
 constexpr size_t BNB_WIDTH = HV_SEGMENT_SIZE;
 constexpr size_t BNB_HEIGHT = __CGR_POINTS__;
-using cgr_bnb_acc_t = cgr_bnb_acc_elem_t[BNB_WIDTH][BNB_HEIGHT];
+template<size_t AccWidth>
+using cgr_bnb_acc_t = cgr_bnb_acc_elem_t<AccWidth>[BNB_WIDTH][BNB_HEIGHT];
 
 // Non-member printer function for CGR hypervectors, i.e., hls::vector with
 // binary digits
 std::ostream& operator<<(std::ostream& os, const cgr_hv_t v);
 
 // Free function alternatives
-void cgr_init_bnb_acc_t(cgr_bnb_acc_t &acc);
+template<size_t BnbAccWidth>
+void cgr_init_bnb_acc_t(cgr_bnb_acc_t<BnbAccWidth> &acc) { parallel_reset(acc); }
 
 void cgr_bind(cgr_hv_t &out, const cgr_hv_t &a, const cgr_hv_t &b);
 
@@ -66,7 +69,7 @@ void inline cgr_bundleN(cgr_hv_t &out, const cgr_hv_t (&hvs)[N]) {
     using acc_elem_t = ap_uint<acc_bits>;
     using acc_bank_t = hls::vector<acc_elem_t, __CGR_POINTS__>;
 
-    cgr_bnb_acc_t acc_bank_vec;
+    cgr_bnb_acc_t<N> acc_bank_vec;
     cgr_init_bnb_acc_t(acc_bank_vec);
 
     CgrBundleVec:
@@ -88,9 +91,44 @@ void inline cgr_bundleN(cgr_hv_t &out, const cgr_hv_t (&hvs)[N]) {
     }
 }
 
-void cgr_bnb_threshold(cgr_hv_t &out, const cgr_bnb_acc_t &acc);
+template<size_t AccBnbWidth>
+void cgr_bnb_threshold(cgr_hv_t &out, const cgr_bnb_acc_t<AccBnbWidth> &acc) {
+    // Threshold to compute the bundled HV
+    for (int i = 0; i < BNB_WIDTH; i++) {
+        #pragma HLS unroll
+        // TODO: Maybe size_t could be optimized to return the exact amount of
+        // bits only
+        size_t argmax;
+        parallel_argmax(argmax, acc[i]);
+        out[i] = argmax;
+    }
+}
 
-void cgr_bnb(cgr_bnb_acc_t &acc_out, const cgr_hv_t &a, const cgr_hv_t &b, const cgr_bnb_acc_t &acc_in);
+
+template<size_t AccBnbWidth>
+void cgr_bnb(
+        cgr_bnb_acc_t<AccBnbWidth> &acc_out,
+        const cgr_hv_t &a,
+        const cgr_hv_t &b,
+        const cgr_bnb_acc_t<AccBnbWidth> &acc_in
+        ) {
+    cgr_hv_t temp;
+    cgr_bind(temp, a, b);
+
+    CgrBnbAcc:
+    for (int e = 0; e < BNB_WIDTH; e++) {
+        #pragma HLS unroll
+        // One-line code
+        //acc_out[e][temp[e]] = acc_in[e][temp[e]]+1;
+
+        // Long code
+        cgr_hv_elem_t ind_cgr = temp[e];
+        uint32_t index = ind_cgr.to_uint();
+        const cgr_bnb_acc_elem_t<AccBnbWidth> (&acc_bank)[BNB_HEIGHT] = acc_in[e];
+        cgr_bnb_acc_elem_t<AccBnbWidth> current_value = acc_bank[index];
+        acc_out[e][index] = current_value+1;
+    }
+}
 
 void cgr_dist(cgr_dist_t &out, const cgr_hv_t &a, const cgr_hv_t &b);
 
@@ -141,11 +179,15 @@ using dim_t = cgr_dim_t;
 using dist_t = cgr_dist_t;
 
 // Special types used for the "Bind and Bundle" operator
-// TODO: This can later be optimized to fit only the necessary bits in accumulation.
-using bnb_acc_elem_t = cgr_bnb_acc_elem_t;
-using bnb_acc_t = cgr_bnb_acc_t;
+template<size_t AccWidth>
+using bnb_acc_elem_t = cgr_bnb_acc_elem_t<AccWidth>;
+template<size_t AccWidth>
+using bnb_acc_t = cgr_bnb_acc_t<AccWidth>;
 
-void inline init_bnb_acc_t(bnb_acc_t &acc) { cgr_init_bnb_acc_t(acc); }
+template<size_t BnbAccWidth>
+void inline init_bnb_acc_t(bnb_acc_t<BnbAccWidth> &acc) {
+    cgr_init_bnb_acc_t<BnbAccWidth>(acc);
+}
 
 // TODO: The types defined in bundling functions and the bnb types are very
 // similar. Maybe they could be merged to simplify the code.
@@ -161,16 +203,18 @@ void inline bundle(hv_t &out, const hv_t &a, const hv_t &b, const hv_t &c) {cgr_
 template<size_t N>
 void inline bundleN(hv_t &out, const hv_t (&hvs)[N]) { cgr_bundleN(out, hvs); }
 
+template<size_t BnbAccWidth>
 void inline bnb_threshold(
         hv_t &out,
-        const bnb_acc_t &acc
+        const bnb_acc_t<BnbAccWidth> &acc
 ) { cgr_bnb_threshold(out, acc); }
 
+template<size_t BnbAccWidth>
 void inline bnb(
-        bnb_acc_t &acc_out,
+        bnb_acc_t<BnbAccWidth> &acc_out,
         const hv_t &a,
         const hv_t &b,
-        const bnb_acc_t &acc_in
+        const bnb_acc_t<BnbAccWidth> &acc_in
 ) { cgr_bnb(acc_out, a, b, acc_in); }
 
 void inline dist(dist_t &out, const hv_t &a, const hv_t &b) { cgr_dist(out, a, b); }

@@ -21,8 +21,6 @@ std::ostream& operator<<(std::ostream& os, const hv_t v) {
 }
 #endif
 
-void cgr_init_bnb_acc_t(bnb_acc_t &acc) { parallel_reset(acc); }
-
 void cgr_bind(hv_t &out, const hv_t &a, const hv_t &b) {
     out = a + b;
 }
@@ -32,10 +30,10 @@ void cgr_bundle(hv_t &out, const hv_t &a, const hv_t &b, const hv_t &c) {
     using acc_elem_t = ap_uint<acc_bits>;
     using acc_bank_t = hls::vector<acc_elem_t, __CGR_POINTS__>;
 
-    bnb_acc_t acc_bank_vec;
+    bnb_acc_t<2> acc_bank_vec;
     hv_t hvs[3] = {a, b, c};
 
-    init_bnb_acc_t(acc_bank_vec);
+    init_bnb_acc_t<2>(acc_bank_vec);
 
     CgrBundleVec:
     for (int v = 0; v < 3; v++) { // TODO: Maybe pipeline or unroll this loop
@@ -54,43 +52,6 @@ void cgr_bundle(hv_t &out, const hv_t &a, const hv_t &b, const hv_t &c) {
         size_t argmax;
         parallel_argmax(argmax, acc_bank_vec[i]);
         out[i] = argmax;
-    }
-}
-
-void cgr_bnb_threshold(
-        hv_t &out,
-        const bnb_acc_t &acc
-) {
-    // Threshold to compute the bundled HV
-    for (int i = 0; i < BNB_WIDTH; i++) {
-        #pragma HLS unroll
-        // TODO: Maybe size_t could be optimized to return the exact amount of bits only
-        size_t argmax;
-        parallel_argmax(argmax, acc[i]);
-        out[i] = argmax;
-    }
-}
-
-void cgr_bnb(
-        bnb_acc_t &acc_out,
-        const hv_t &a,
-        const hv_t &b,
-        const bnb_acc_t &acc_in) {
-    hv_t temp;
-    cgr_bind(temp, a, b);
-
-    CgrBnbAcc:
-    for (int e = 0; e < BNB_WIDTH; e++) {
-        #pragma HLS unroll
-        // One-line code
-        //acc_out[e][temp[e]] = acc_in[e][temp[e]]+1;
-
-        // Long code
-        hv_elem_t ind_cgr = temp[e];
-        uint32_t index = ind_cgr.to_uint();
-        const bnb_acc_elem_t (&acc_bank)[BNB_HEIGHT] = acc_in[e];
-        bnb_acc_elem_t current_value = acc_bank[index];
-        acc_out[e][index] = current_value+1;
     }
 }
 
