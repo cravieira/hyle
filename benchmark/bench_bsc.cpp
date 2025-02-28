@@ -20,3 +20,11 @@ void bsc_bnb32(
     bsc_bnb_threshold<BnbAccWidth>(out, bundle_acc, NUM_HVS/2);
 }
 
+void bsc_bnb_threshold4(
+        bsc_hv_t &out,
+        const bsc_bnb_acc_t<4> &bundle_acc
+        ) {
+    #pragma HLS array_partition variable=bundle_acc dim=1
+
+    bsc_bnb_threshold<4>(out, bundle_acc);
+}

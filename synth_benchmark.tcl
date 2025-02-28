@@ -3,14 +3,14 @@ source tcl/common.tcl
 set DIM 32
 set CGR_POINTS 4
 set VSA "cgr"; # VSA = bsc|cgr
-set OPERATION "bind"; # OPERATION = bind|bnb_32|dist
+set OPERATION "bnb32"; # OPERATION = bind|bnb32|dist|bnb_threshold4
 
 # Is there a custom parameter file?
 if {$argc == 1} {
     source [lindex $argv 0]
 }
 set valid_vsa {"bsc" "cgr"}
-set valid_operation {"bind" "bnb32" "dist"}
+set valid_operation {"bind" "bnb32" "dist" "bnb_threshold4"}
 set datapaths 1; # Number of parallel segment datapaths
 
 com_assert_in $VSA $valid_vsa
