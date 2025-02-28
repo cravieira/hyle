@@ -16,8 +16,6 @@ std::ostream& operator<<(std::ostream& os, const hv_t v) {
 }
 #endif
 
-void bsc_init_bnb_acc_t(bnb_acc_t &acc) { acc = static_cast<bnb_acc_elem_t>(0); }
-
 void bsc_bind(hv_t &out, const hv_t &a, const hv_t &b) {
     out = a ^ b;
 }
@@ -37,31 +35,6 @@ void bsc_bundle(hv_t &out, const hv_t &a, const hv_t &b, const hv_t &c) {
 
         // Get the MSB of the sum. This should be equivalent to the thresholding
         out[i] = static_cast<hv_elem_t>(sum[acc_bits-1]);
-    }
-}
-
-void bsc_bnb_threshold(
-        hv_t &out,
-        const bnb_acc_t &acc,
-        const bnb_acc_elem_t &threshold) {
-    BscBnbThreshold:
-    for (size_t i = 0; i < acc.size(); i++) {
-        hv_elem_t bit = acc[i] > threshold;
-        out[i] = bit;
-    }
-}
-
-void bsc_bnb(
-        bnb_acc_t &acc_out,
-        const hv_t &a,
-        const hv_t &b,
-        const bnb_acc_t &acc_in
-        ) {
-    hv_t temp = a^b;
-    BscBnbAcc:
-    for (size_t i = 0; i < temp.size(); i++) {
-#pragma HLS unroll
-        acc_out[i] = acc_in[i] + temp[i];
     }
 }
 

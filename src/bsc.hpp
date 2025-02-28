@@ -17,17 +17,18 @@ using bsc_dim_t = ap_uint<number_of_bits(HV_SEGMENT_SIZE*HV_SEGMENTS)>;
 using bsc_dist_t = ap_uint<number_of_bits(DIM)>;
 
 // Special types used for the "Bind and Bundle" operator
-using bsc_bnb_acc_elem_t = ap_uint<10>; // TODO: This can later be optimized to fit
-                                    // only the necessary bits in accumulation.
-using bsc_bnb_acc_t = hls::vector<bsc_bnb_acc_elem_t, HV_SEGMENT_SIZE>;
-
-void bsc_init_bnb_acc_t(bsc_bnb_acc_t &acc);
+template<size_t Width>
+using bsc_bnb_acc_elem_t = ap_uint<Width>;
+template<size_t AccWidth>
+using bsc_bnb_acc_t = bsc_bnb_acc_elem_t<AccWidth>[HV_SEGMENT_SIZE];
 
 // Non-member printer function for BSC hypervectors, i.e., hls::vector with
 // binary digits
 std::ostream& operator<<(std::ostream& os, const bsc_hv_t v);
 
 // BSC
+template<size_t BnbAccWidth>
+void bsc_init_bnb_acc_t(bsc_bnb_acc_t<BnbAccWidth> &acc) { parallel_reset(acc); }
 
 void bsc_bind(bsc_hv_t &out, const bsc_hv_t &a, const bsc_hv_t &b);
 
@@ -68,17 +69,33 @@ void bsc_bundleN(bsc_hv_t &out, const bsc_hv_t (&hvs)[N]) {
     }
 }
 
+template<size_t AccBnbWidth>
 void bsc_bnb_threshold(
         bsc_hv_t &out,
-        const bsc_bnb_acc_t &acc,
-        const bsc_bnb_acc_elem_t &threshold);
+        const bsc_bnb_acc_t<AccBnbWidth> &acc,
+        const bsc_bnb_acc_elem_t<AccBnbWidth> &threshold) {
+    BscBnbThreshold:
+    for (size_t i = 0; i < out.size(); i++) {
+        #pragma HLS unroll
+        bsc_hv_elem_t bit = acc[i] > threshold;
+        out[i] = bit;
+    }
+}
 
+template<size_t AccBnbWidth>
 void bsc_bnb(
-        bsc_bnb_acc_t &acc_out,
+        bsc_bnb_acc_t<AccBnbWidth> &acc_out,
         const bsc_hv_t &a,
         const bsc_hv_t &b,
-        const bsc_bnb_acc_t &acc_in
-);
+        const bsc_bnb_acc_t<AccBnbWidth> &acc_in
+) {
+    bsc_hv_t temp = a^b;
+    BscBnbAcc:
+    for (size_t i = 0; i < temp.size(); i++) {
+        #pragma HLS unroll
+        acc_out[i] = acc_in[i] + temp[i];
+    }
+}
 
 void bsc_dist(bsc_dist_t &out, const bsc_hv_t &a, const bsc_hv_t &b);
 
@@ -133,10 +150,13 @@ using dim_t = bsc_dim_t;
 using dist_t = bsc_dist_t;
 
 // Special types used for the "Bind and Bundle" operator
-using bnb_acc_elem_t = bsc_bnb_acc_elem_t;
-using bnb_acc_t = bsc_bnb_acc_t;
+template<size_t AccWidth>
+using bnb_acc_elem_t = bsc_bnb_acc_elem_t<AccWidth>;
+template<size_t AccWidth>
+using bnb_acc_t = bsc_bnb_acc_t<AccWidth>;
 
-void inline init_bnb_acc_t(bnb_acc_t &acc) { bsc_init_bnb_acc_t(acc); };
+template<size_t BnbAccWidth>
+void inline init_bnb_acc_t(bnb_acc_t<BnbAccWidth> &acc) { bsc_init_bnb_acc_t<BnbAccWidth>(acc); };
 
 // BSC
 void inline bind(hv_t &out, const hv_t &a, const hv_t &b) { bsc_bind(out, a, b); }
@@ -149,17 +169,19 @@ void inline bundle(hv_t &out, const hv_t &a, const hv_t &b, const hv_t &c) {bsc_
 template<size_t N>
 void inline bundleN(hv_t &out, const hv_t (&hvs)[N]) { bsc_bundleN(out, hvs); }
 
+template<size_t BnbAccWidth>
 void inline bnb_threshold(
         hv_t &out,
-        const bnb_acc_t &acc,
-        const bnb_acc_elem_t &threshold
-) { bsc_bnb_threshold(out, acc, threshold); }
+        const bnb_acc_t<BnbAccWidth> &acc,
+        const bnb_acc_elem_t<BnbAccWidth> &threshold
+) { bsc_bnb_threshold<BnbAccWidth>(out, acc, threshold); }
 
+template<size_t BnbAccWidth>
 void inline bnb(
-        bnb_acc_t &acc_out,
+        bnb_acc_t<BnbAccWidth> &acc_out,
         const hv_t &a,
         const hv_t &b,
-        const bnb_acc_t &acc_in
+        const bnb_acc_t<BnbAccWidth> &acc_in
 ) { bsc_bnb(acc_out, a, b, acc_in); }
 
 void inline dist(dist_t &out, const hv_t &a, const hv_t &b) { bsc_dist(out, a, b); }

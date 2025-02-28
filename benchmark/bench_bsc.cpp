@@ -10,12 +10,13 @@ void bsc_bnb32(
         const bsc_hv_t (&im1)[NUM_HVS],
         const bsc_hv_t (&im2)[NUM_HVS]
         ) {
-    bsc_bnb_acc_t bundle_acc;
-    bsc_init_bnb_acc_t(bundle_acc);
+    constexpr size_t BnbAccWidth = 4;
+    bsc_bnb_acc_t<BnbAccWidth> bundle_acc;
+    bsc_init_bnb_acc_t<BnbAccWidth>(bundle_acc);
     BnbLoop:
     for (int i = 0; i < NUM_HVS; i++) {
-        bsc_bnb(bundle_acc, im1[i], im2[i], bundle_acc);
+        bsc_bnb<BnbAccWidth>(bundle_acc, im1[i], im2[i], bundle_acc);
     }
-    bsc_bnb_threshold(out, bundle_acc, NUM_HVS/2);
+    bsc_bnb_threshold<BnbAccWidth>(out, bundle_acc, NUM_HVS/2);
 }
 
