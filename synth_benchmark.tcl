@@ -5,6 +5,10 @@ set CGR_POINTS 4
 set VSA "cgr"; # VSA = bsc|cgr
 set OPERATION "bnb32"; # OPERATION = bind|bnb32|dist|bnb_threshold4
 
+# Width of each register in accumulator bank type "acc_bank_t". Changes the
+# amount of resources of bnb32 operation.
+set BNB_ACC_WIDTH 3;
+
 # Is there a custom parameter file?
 if {$argc == 1} {
     source [lindex $argv 0]
@@ -19,7 +23,7 @@ com_assert_in $OPERATION $valid_operation
 set SEGMENT_SIZE ${DIM}
 set SEGMENTS [expr $DIM / $SEGMENT_SIZE]
 
-set cflags "-D__HV_DIMENSIONS__=${DIM} -D__HV_SEGMENT_SIZE__=${SEGMENT_SIZE} -D__SEGMENT_DATAPATHS__=${datapaths} -D__CGR_POINTS__=${CGR_POINTS} -Isrc"
+set cflags "-D__HV_DIMENSIONS__=${DIM} -D__HV_SEGMENT_SIZE__=${SEGMENT_SIZE} -D__SEGMENT_DATAPATHS__=${datapaths} -D__CGR_POINTS__=${CGR_POINTS} -D__BNB_ACC_WIDTH__=${BNB_ACC_WIDTH} -Isrc"
 
 if { ${VSA} == "bsc"} {
     set model_name "${VSA}"
@@ -27,8 +31,13 @@ if { ${VSA} == "bsc"} {
     set model_name "${VSA}${CGR_POINTS}"
 }
 
-open_project "vitis_bench-${model_name}-${OPERATION}-d${DIM}" -reset
-#open_project "vitis_bench-${model_name}-${OPERATION}-d${DIM}"
+set bench_scenario ${OPERATION}
+# Append acc_width information to bnb32 case
+if { ${OPERATION} == "bnb32" } {
+    set bench_scenario "${OPERATION}-accwidth${BNB_ACC_WIDTH}"
+}
+
+open_project "vitis_bench-${model_name}-${bench_scenario}-d${DIM}" -reset
 
 add_files -cflags ${cflags} -tb "src/common.hpp"
 add_files -cflags ${cflags} -tb "src/defines.hpp"
@@ -51,6 +60,8 @@ if {$VSA == "bsc"} {
     set_directive_unroll bsc_bnb_threshold/BscBnbThreshold
     set_directive_inline bsc_bnb
     set_directive_inline bsc_bnb_threshold
+    set_directive_inline init_bnb_acc_t
+    set_directive_array_partition -dim 1 bsc_bnb32 bundle_acc
 
     # dist
     set_directive_unroll bsc_dist/AddReduce

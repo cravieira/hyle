@@ -3,6 +3,11 @@
 #include "cgr.hpp"
 #include "common.hpp"
 
+#ifndef __BNB_ACC_WIDTH__
+#define __BNB_ACC_WIDTH__ -1
+#endif
+constexpr size_t BnbAccWidth = __BNB_ACC_WIDTH__;
+
 constexpr size_t NUM_HVS = 32;
 
 void cgr_bnb32(
@@ -10,7 +15,6 @@ void cgr_bnb32(
         const cgr_hv_t (&im1)[NUM_HVS],
         const cgr_hv_t (&im2)[NUM_HVS]
         ) {
-    constexpr size_t BnbAccWidth = 3;
     cgr_bnb_acc_t<BnbAccWidth> bundle_acc;
     cgr_init_bnb_acc_t<BnbAccWidth>(bundle_acc);
     BnbLoop:
