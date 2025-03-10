@@ -207,7 +207,7 @@ template<size_t BnbAccWidth>
 void inline bnb_threshold(
         hv_t &out,
         const bnb_acc_t<BnbAccWidth> &acc
-) { cgr_bnb_threshold(out, acc); }
+) { cgr_bnb_threshold<BnbAccWidth>(out, acc); }
 
 template<size_t BnbAccWidth>
 void inline bnb(
@@ -215,7 +215,7 @@ void inline bnb(
         const hv_t &a,
         const hv_t &b,
         const bnb_acc_t<BnbAccWidth> &acc_in
-) { cgr_bnb(acc_out, a, b, acc_in); }
+) { cgr_bnb<BnbAccWidth>(acc_out, a, b, acc_in); }
 
 void inline dist(dist_t &out, const hv_t &a, const hv_t &b) { cgr_dist(out, a, b); }
 

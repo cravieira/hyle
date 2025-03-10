@@ -44,8 +44,9 @@ void voicehd_enc_bnb(
     vsa::bsc::hv_t item, c_item;
     vsa::bsc::hv_t bound_hvs[VOICEHD_FEATURES];
 
-    vsa::bsc::bnb_acc_t bundle_acc;
-    vsa::bsc::init_bnb_acc_t(bundle_acc);
+    constexpr size_t BnbAccWidth = number_of_bits(VOICEHD_FEATURES);
+    vsa::bsc::bnb_acc_t<BnbAccWidth> bundle_acc;
+    vsa::bsc::init_bnb_acc_t<BnbAccWidth>(bundle_acc);
 
     SegmentBind:
     for (size_t channel = 0; channel < VOICEHD_FEATURES; channel++) {
@@ -56,9 +57,9 @@ void voicehd_enc_bnb(
         _read_mem<VOICEHD_LEVELS>(c_item, cim, features[channel]);
 
         // Encode
-        vsa::bsc::bnb(bundle_acc, item, c_item, bundle_acc);
+        vsa::bsc::bnb<BnbAccWidth>(bundle_acc, item, c_item, bundle_acc);
     }
-    vsa::bsc::bnb_threshold(query, bundle_acc, VOICEHD_FEATURES/2);
+    vsa::bsc::bnb_threshold<BnbAccWidth>(query, bundle_acc, VOICEHD_FEATURES/2);
 }
 
 /**
@@ -117,8 +118,9 @@ void voicehd_enc_bnb(
     vsa::cgr::hv_t item, c_item;
     vsa::cgr::hv_t bound_hvs[VOICEHD_FEATURES];
 
-    vsa::cgr::bnb_acc_t bundle_acc;
-    vsa::cgr::init_bnb_acc_t(bundle_acc);
+    constexpr size_t BnbAccWidth = number_of_bits(VOICEHD_FEATURES);
+    vsa::cgr::bnb_acc_t<BnbAccWidth> bundle_acc;
+    vsa::cgr::init_bnb_acc_t<BnbAccWidth>(bundle_acc);
 
     SegmentBind:
     for (size_t channel = 0; channel < VOICEHD_FEATURES; channel++) {
@@ -129,9 +131,9 @@ void voicehd_enc_bnb(
         _read_mem<VOICEHD_LEVELS>(c_item, cim, features[channel]);
 
         // Encode
-        vsa::cgr::bnb(bundle_acc, item, c_item, bundle_acc);
+        vsa::cgr::bnb<BnbAccWidth>(bundle_acc, item, c_item, bundle_acc);
     }
-    vsa::cgr::bnb_threshold(query, bundle_acc);
+    vsa::cgr::bnb_threshold<BnbAccWidth>(query, bundle_acc);
 }
 
 // Datapath functions - These functions should be HDC class agnostic

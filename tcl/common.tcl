@@ -8,3 +8,8 @@ proc com_assert_in {name names {msg ""}} {
         exit 1
     }
 }
+
+# Common part number used in all experiments
+proc com_set_part {} {
+    set_part  {xczu7ev-ffvf1517-3-e}
+}

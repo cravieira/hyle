@@ -182,7 +182,7 @@ void inline bnb(
         const hv_t &a,
         const hv_t &b,
         const bnb_acc_t<BnbAccWidth> &acc_in
-) { bsc_bnb(acc_out, a, b, acc_in); }
+) { bsc_bnb<BnbAccWidth>(acc_out, a, b, acc_in); }
 
 void inline dist(dist_t &out, const hv_t &a, const hv_t &b) { bsc_dist(out, a, b); }
 

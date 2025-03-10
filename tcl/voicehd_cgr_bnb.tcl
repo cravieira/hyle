@@ -5,9 +5,9 @@
 set_directive_interface -mode ap_memory -storage_type rom_1p voicehd_enc_seg im
 set_directive_interface -mode ap_memory -storage_type rom_1p voicehd_enc_seg cim
 set_directive_interface -mode ap_memory -storage_type rom_1p voicehd_enc_seg am
-set_directive_array_partition -dim 1 -type cyclic -factor ${datapaths} voicehd_enc_seg im
-set_directive_array_partition -dim 1 -type cyclic -factor ${datapaths} voicehd_enc_seg cim
-set_directive_array_partition -dim 1 -type cyclic -factor ${datapaths} voicehd_enc_seg am
+set_directive_array_partition -dim 1 -type cyclic -factor ${DATAPATHS} voicehd_enc_seg im
+set_directive_array_partition -dim 1 -type cyclic -factor ${DATAPATHS} voicehd_enc_seg cim
+set_directive_array_partition -dim 1 -type cyclic -factor ${DATAPATHS} voicehd_enc_seg am
 #set_directive_array_partition -dim 2 voicehd_enc_seg im; # needs to be on dim 2?
 #set_directive_array_partition -dim 2 voicehd_enc_seg cim; # needs to be on dim 2?
 #set_directive_array_partition -dim 2 voicehd_enc_seg am; # needs to be on dim 2?
