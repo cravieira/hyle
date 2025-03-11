@@ -25,10 +25,10 @@ set SEGMENTS [expr $DIM / $SEGMENT_SIZE]
 
 set cflags "-D__HV_DIMENSIONS__=${DIM} -D__HV_SEGMENT_SIZE__=${SEGMENT_SIZE} -D__SEGMENT_DATAPATHS__=${datapaths} -D__CGR_POINTS__=${CGR_POINTS} -D__BNB_ACC_WIDTH__=${BNB_ACC_WIDTH} -Isrc"
 
-if { ${VSA} == "bsc"} {
-    set model_name "${VSA}"
-} elseif { ${VSA} == "cgr" } {
-    set model_name "${VSA}${CGR_POINTS}"
+set model_name "${VSA}"
+# Append the number of points used in CGR to the model name
+if { ${VSA} == "cgr" } {
+    set model_name "$${model_name}${CGR_POINTS}"
 }
 
 set bench_scenario ${OPERATION}
@@ -47,7 +47,7 @@ add_files -cflags ${cflags} "src/${VSA}.hpp"
 add_files -cflags ${cflags} "benchmark/bench_${VSA}.cpp"
 
 open_solution "solution1"
-set_part  {xczu7ev-ffvf1517-3-e}
+com_set_part
 create_clock -period 10
 
 set_top ${VSA}_${OPERATION}

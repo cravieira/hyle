@@ -23,16 +23,11 @@ set SEGMENTS [expr $DIM / $SEGMENT_SIZE]
 set valid_VSA {"bsc" "cgr"}
 com_assert_in $VSA $valid_VSA
 
-# TODO: Set VSA in a more simple approach. Find out how to invert the case of a text in a variable
-if { ${VSA} == "bsc"} {
-    set model_name "${VSA}"
-    set define_VSA "-D__VSA_BSC__"
-} elseif { ${VSA} == "cgr" } {
-    set model_name "${VSA}${CGR_POINTS}"
-    set define_VSA "-D__VSA_CGR__"
-} else {
-    puts "Invalid VSA class: \"${VSA}\""
-    exit 1
+set model_name "${VSA}"
+set define_VSA "-D__VSA_[string toupper $VSA]__"; # Define VSA to be used in app
+# Append the number of points used in CGR to the model name
+if { ${VSA} == "cgr" } {
+    set model_name "${model_name}${CGR_POINTS}"
 }
 
 set cflags "-D__HV_DIMENSIONS__=${DIM} -D__HV_SEGMENT_SIZE__=${SEGMENT_SIZE} -D__SEGMENT_DATAPATHS__=${DATAPATHS} ${define_VSA} -D__CGR_POINTS__=${CGR_POINTS}"
