@@ -57,7 +57,8 @@ set_directive_array_partition voicehd_enc_seg s_acc_dists
 # Accelerator optimizations. Pick one!
 #source tcl/voicehd_bsc_opt.tcl; # Vertical unrolled design
 #source tcl/voicehd_bsc_bnb.tcl; # Multi-cycle encoding with fused bind-and-bundle
-source tcl/voicehd_cgr_bnb.tcl; # Multi-cycle encoding with fused bind-and-bundle for CGR
+#source tcl/voicehd_cgr_bnb.tcl; # Multi-cycle encoding with fused bind-and-bundle for CGR
+source tcl/voicehd_${VSA}_bnb.tcl; # Multi-cycle encoding with fused bind-and-bundle for CGR
 
 set serial_dir "${script_path}/serial"
 set im_path "${serial_dir}/voicehd-${model_name}-d${DIM}-id.txt"

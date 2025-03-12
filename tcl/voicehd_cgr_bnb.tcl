@@ -24,17 +24,17 @@ set_directive_array_partition -dim 1 voicehd_enc_bnb bundle_acc; # TODO: This pr
 
 # CGR #
 # bind
-set_directive_inline bind
+set_directive_inline cgr_bind
 
 # bnb
-set_directive_inline bnb_threshold
-set_directive_inline bnb
-set_directive_inline init_bnb_acc_t
+set_directive_inline cgr_bnb_threshold
+set_directive_inline cgr_bnb
+set_directive_inline cgr_init_bnb_acc_t
 
 # dist
-set_directive_inline dist
-set_directive_unroll dist/AddReduce
-set_directive_inline distN
+set_directive_inline cgr_dist
+set_directive_unroll cgr_dist/AddReduce
+set_directive_inline cgr_distN
 
 # TESTS
 # Datapath instantiation. Choose if datapaths are instantiated explicitely or implicitely using inlining. Mutually exclusive.
