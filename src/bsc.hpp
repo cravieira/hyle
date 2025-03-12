@@ -156,25 +156,43 @@ template<size_t AccWidth>
 using bnb_acc_t = bsc_bnb_acc_t<AccWidth>;
 
 template<size_t BnbAccWidth>
-void inline init_bnb_acc_t(bnb_acc_t<BnbAccWidth> &acc) { bsc_init_bnb_acc_t<BnbAccWidth>(acc); };
+void inline init_bnb_acc_t(bnb_acc_t<BnbAccWidth> &acc) {
+    #pragma HLS inline
+    bsc_init_bnb_acc_t<BnbAccWidth>(acc);
+};
 
 // BSC
-void inline bind(hv_t &out, const hv_t &a, const hv_t &b) { bsc_bind(out, a, b); }
+void inline bind(hv_t &out, const hv_t &a, const hv_t &b) {
+    #pragma HLS inline
+    bsc_bind(out, a, b);
+}
 
 template<size_t N>
-void inline bindN(hv_t &out, const hv_t (&hvs)[N]) { bsc_bindN(out, hvs); }
+void inline bindN(hv_t &out, const hv_t (&hvs)[N]) {
+    #pragma HLS inline
+    bsc_bindN(out, hvs);
+}
 
-void inline bundle(hv_t &out, const hv_t &a, const hv_t &b, const hv_t &c) {bsc_bundle(out, a, b, c); }
+void inline bundle(hv_t &out, const hv_t &a, const hv_t &b, const hv_t &c) {
+    #pragma HLS inline
+    bsc_bundle(out, a, b, c);
+}
 
 template<size_t N>
-void inline bundleN(hv_t &out, const hv_t (&hvs)[N]) { bsc_bundleN(out, hvs); }
+void inline bundleN(hv_t &out, const hv_t (&hvs)[N]) {
+    #pragma HLS inline
+    bsc_bundleN(out, hvs);
+}
 
 template<size_t BnbAccWidth>
 void inline bnb_threshold(
         hv_t &out,
         const bnb_acc_t<BnbAccWidth> &acc,
         const bnb_acc_elem_t<BnbAccWidth> &threshold
-) { bsc_bnb_threshold<BnbAccWidth>(out, acc, threshold); }
+) {
+    #pragma HLS inline
+    bsc_bnb_threshold<BnbAccWidth>(out, acc, threshold);
+}
 
 template<size_t BnbAccWidth>
 void inline bnb(
@@ -182,9 +200,15 @@ void inline bnb(
         const hv_t &a,
         const hv_t &b,
         const bnb_acc_t<BnbAccWidth> &acc_in
-) { bsc_bnb<BnbAccWidth>(acc_out, a, b, acc_in); }
+) {
+    #pragma HLS inline
+    bsc_bnb<BnbAccWidth>(acc_out, a, b, acc_in);
+}
 
-void inline dist(dist_t &out, const hv_t &a, const hv_t &b) { bsc_dist(out, a, b); }
+void inline dist(dist_t &out, const hv_t &a, const hv_t &b) {
+    #pragma HLS inline
+    bsc_dist(out, a, b);
+}
 
 template<size_t N>
 void inline distN(
@@ -192,6 +216,7 @@ void inline distN(
         const hv_t &query,
         const hv_t (&am)[N]
         ) {
+    #pragma HLS inline
     bsc_distN(dists, query, am);
 }
 
@@ -201,6 +226,7 @@ void inline search(
         const hv_t &query,
         const hv_t (&am)[N]
         ) {
+    #pragma HLS inline
     bsc_search(argmin, query, am);
 }
 }
