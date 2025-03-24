@@ -10,52 +10,9 @@
 
 #include "defines.hpp"
 #include "voicehd.hpp"
+#include "dataset.hpp"
 
 // Dataset loaders
-typedef std::vector<feat_t> data_t;
-typedef std::vector<data_t> dataset_t;
-typedef std::vector<class_t> label_t;
-
-dataset_t read_dataset(const std::string& path) {
-    std::ifstream f(path);
-    if (!f.is_open()) {
-        throw std::runtime_error("Unable to open dataset file: " + path);
-    }
-
-    dataset_t dataset;
-    std::string line;
-    while (std::getline(f, line)) {
-        float i;
-        data_t data;
-        std::stringstream ss(line);
-        while (ss >> i) {
-            data.emplace_back(i);
-            if (ss.peek() == ',') {
-                ss.ignore();
-            }
-        }
-        dataset.emplace_back(data);
-    }
-
-    return dataset;
-}
-
-label_t read_labels(const std::string& path) {
-    std::ifstream f(path);
-    if (!f.is_open()) {
-        std::cerr << "Could not open file: " << path << std::endl;
-        assert(f.is_open());
-    }
-
-    label_t labels;
-    std::string line;
-    while (std::getline(f, line)) {
-        labels.emplace_back(std::stoi(line));
-    }
-
-    return labels;
-}
-
 // Memory initializers
 std::vector<hv_t> read_mem(
         const std::string &path
@@ -112,50 +69,6 @@ std::array<hv_t, N> init_mem(const std::string &path) {
     }
 
     return mem;
-}
-
-// HV memory type. Types used for memory file handling
-using mem_data_t = std::vector<std::vector<hv_elem_t>>;
-
-mem_data_t parse_mem_file(const std::string &path) {
-    std::ifstream f(path);
-    if (!f.is_open()) {
-        throw std::runtime_error("Unable to open HV memory file: " + path);
-    }
-
-    mem_data_t mem_data;
-    std::string line;
-    while (std::getline(f, line)) {
-        int i;
-        std::vector<hv_elem_t> buffer;
-        std::stringstream ss(line);
-        while (ss >> i) {
-            buffer.emplace_back(static_cast<hv_elem_t>(i));
-            if (ss.peek() == ',') {
-                ss.ignore();
-            }
-        }
-        mem_data.emplace_back(buffer);
-    }
-
-    return mem_data;
-}
-
-template<size_t N>
-void segment_mem(const mem_data_t &parsed_mem, hv_t (&reshaped_mem)[HV_SEGMENTS][N]) {
-    const size_t expected_hv_size = HV_SEGMENTS*HV_SEGMENT_SIZE;
-
-    for (size_t s = 0; s < HV_SEGMENTS; s++) {
-        for (size_t n = 0; n < N; n++) {
-            if (parsed_mem[n].size() != expected_hv_size) {
-                throw std::runtime_error("Number of HV dimensions in HV memory file parsed is different from expected (" + std::to_string(expected_hv_size) + "). Ensure you defined the appropriate number of HV dimensions (" + std::to_string(DIM) + ") and segment size (" + std::to_string(HV_SEGMENT_SIZE) + ").");
-            }
-
-            for (size_t d = 0; d < HV_SEGMENT_SIZE; d++) {
-                reshaped_mem[s][n][d] = parsed_mem[n][s*HV_SEGMENT_SIZE+d];
-            }
-        }
-    }
 }
 
 int main(int argc, char *argv[]) {

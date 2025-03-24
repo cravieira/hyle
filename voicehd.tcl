@@ -44,6 +44,8 @@ add_files -cflags ${cflags} "src/cgr.cpp"
 add_files -cflags ${cflags} "src/cgr.hpp"
 add_files -cflags ${cflags} "src/voicehd.hpp"
 add_files -cflags ${cflags} "src/voicehd.cpp"
+add_files -cflags ${cflags} "src/dataset.hpp"
+add_files -cflags ${cflags} "src/dataset.cpp"
 
 set_top voicehd_enc_seg
 open_solution "solution1"
