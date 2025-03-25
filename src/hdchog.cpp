@@ -7,6 +7,7 @@
 
 using dist_bank_t = dist_t[HDCHOG_CLASSES];
 
+// BSC encoding
 void bsc_enc_grad_hv(
         bsc_hv_t &grad_hv,
         const cell_t &features,
@@ -20,7 +21,8 @@ void bsc_enc_grad_hv(
     GradBnb:
     for (size_t ori = 0; ori < HOG_ORIENTATIONS; ori++) {
         // Encode
-        bsc_bnb<BnbAccWidth>(bundle_acc, ori_mem[ori], mag_mem[features[ori]], bundle_acc);
+        hv_t mag_hv = mag_mem[features[ori]];
+        bsc_bnb<BnbAccWidth>(bundle_acc, ori_mem[ori], mag_hv, bundle_acc);
     }
     bsc_bnb_threshold<BnbAccWidth>(grad_hv, bundle_acc, HOG_ORIENTATIONS/2);
 }
@@ -57,6 +59,57 @@ void hdchog_bsc_enc(
     bsc_enc_mat_hv(query, cell_mem, grad_hvs);
 }
 
+// CGR encoding
+void cgr_enc_grad_hv(
+        cgr_hv_t &grad_hv,
+        const cell_t &features,
+        const cgr_hv_t (&ori_mem)[HOG_ORIENTATIONS],
+        const cgr_hv_t (&mag_mem)[HOG_MAGNITUDES]
+        ) {
+    constexpr size_t BnbAccWidth = number_of_bits(HOG_ORIENTATIONS);
+    cgr_bnb_acc_t<BnbAccWidth> bundle_acc;
+    cgr_init_bnb_acc_t<BnbAccWidth>(bundle_acc);
+
+    GradBnb:
+    for (size_t ori = 0; ori < HOG_ORIENTATIONS; ori++) {
+        // Encode
+        cgr_bnb<BnbAccWidth>(bundle_acc, ori_mem[ori], mag_mem[features[ori]], bundle_acc);
+    }
+    cgr_bnb_threshold<BnbAccWidth>(grad_hv, bundle_acc);
+}
+
+void cgr_enc_mat_hv(
+        cgr_hv_t &mat_hv,
+        const cgr_hv_t (&cell_hvs)[HOG_CELLS],
+        const cgr_hv_t (&grad_hvs)[HOG_CELLS]
+        ) {
+    constexpr size_t BnbAccWidth = number_of_bits(HOG_CELLS);
+    cgr_bnb_acc_t<BnbAccWidth> bundle_acc;
+    cgr_init_bnb_acc_t<BnbAccWidth>(bundle_acc);
+
+    CellBnb:
+    for (size_t i = 0; i < HOG_CELLS; i++) {
+        // Encode
+        cgr_bnb<BnbAccWidth>(bundle_acc, cell_hvs[i], grad_hvs[i], bundle_acc);
+    }
+    cgr_bnb_threshold<BnbAccWidth>(mat_hv, bundle_acc);
+}
+
+void hdchog_cgr_enc(
+        cgr_hv_t &query,
+        const hog_t &features,
+        const cgr_hv_t (&cell_mem)[HOG_CELLS],
+        const cgr_hv_t (&ori_mem)[HOG_ORIENTATIONS],
+        const cgr_hv_t (&mag_mem)[HOG_MAGNITUDES]
+        ) {
+    cgr_hv_t grad_hvs[HOG_CELLS];
+    GradEnc:
+    for (int i = 0; i < HOG_CELLS; i++) {
+        cgr_enc_grad_hv(grad_hvs[i], features[i], ori_mem, mag_mem);
+    }
+    cgr_enc_mat_hv(query, cell_mem, grad_hvs);
+}
+
 void hdchog_dp(
         const hog_t &features,
         const hv_t (&cell_mem)[HOG_CELLS],
@@ -70,6 +123,8 @@ void hdchog_dp(
     hv_t query;
 
     hdchog_bsc_enc(query, features, cell_mem, ori_mem, mag_mem);
+    //hdchog_cgr_enc(query, features, cell_mem, ori_mem, mag_mem);
+
     dist_bank_t dists;
     distN<HDCHOG_CLASSES>(dists, query, am);
     for (int i = 0; i < HDCHOG_CLASSES; i++) {

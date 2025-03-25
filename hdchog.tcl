@@ -4,7 +4,7 @@ source tcl/common.tcl
 set DIM 1000
 set SEGMENT_SIZE ${DIM}
 set DATAPATHS 1; # Number of parallel segment datapaths
-set VSA "bsc"
+set VSA "cgr"
 set CGR_POINTS 4
 set script_path [ file dirname [ file normalize [ info script ] ] ]; # Path of this script file
 
