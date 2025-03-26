@@ -2,9 +2,9 @@ source tcl/common.tcl
 
 # Define HV constants
 set DIM 1000
-set SEGMENT_SIZE ${DIM}
+set SEGMENT_SIZE 1000
 set DATAPATHS 1; # Number of parallel segment datapaths
-set VSA "cgr"
+set VSA "bsc"
 set CGR_POINTS 4
 set script_path [ file dirname [ file normalize [ info script ] ] ]; # Path of this script file
 
@@ -41,23 +41,25 @@ add_files -cflags ${cflags} "src/cgr.cpp"
 add_files -cflags ${cflags} "src/cgr.hpp"
 add_files -cflags ${cflags} "src/hdchog.hpp"
 add_files -cflags ${cflags} "src/hdchog.cpp"
-add_files -cflags ${cflags} "src/dataset.hpp"
-add_files -cflags ${cflags} "src/dataset.cpp"
+add_files -cflags ${cflags} -tb "src/dataset.hpp"
+add_files -cflags ${cflags} -tb "src/dataset.cpp"
 
-set_top hdchog_top
+set TOP "cgr_enc_mat_hv"
+set TOP "cgr_enc_grad_hv"
+set TOP "hdchog"
+set_top ${TOP}
 open_solution "solution1"
 com_set_part
 create_clock -period 10
 
 # voicehd_enc_seg_dp() #
-#set_directive_unroll -factor ${DATAPATHS} voicehd_enc_seg/VoiceHD_Segment
-#set_directive_array_partition voicehd_enc_seg s_acc_dists
+set_directive_unroll -factor ${DATAPATHS} hdchog/HDCHOG_Segment
+set_directive_array_partition hdchog s_acc_dists
+# Explicitely instantiate datapath
+set_directive_function_instantiate hdchog_dp datapath_id
 
 # Accelerator optimizations. Pick one!
-#source tcl/voicehd_bsc_opt.tcl; # Vertical unrolled design
-#source tcl/voicehd_bsc_bnb.tcl; # Multi-cycle encoding with fused bind-and-bundle
-#source tcl/voicehd_cgr_bnb.tcl; # Multi-cycle encoding with fused bind-and-bundle for CGR
-#source tcl/voicehd_${VSA}_bnb.tcl; # Multi-cycle encoding with fused bind-and-bundle for CGR
+source tcl/hdchog_no_pipeline.tcl; # No pipeline
 
 set serial_dir "${script_path}/serial"
 set cell_hv_path "${serial_dir}/hdchog-${model_name}-d${DIM}-cell_hv.txt"
@@ -71,7 +73,7 @@ csim_design -argv "${cell_hv_path} ${ori_hv_path} ${mag_hv_path} ${am_path} ${ds
 #csim_design -setup
 
 #csynth_design -dump_cfg -synthesis_check
-#csynth_design
+csynth_design
 
 #cosim_design -O
 

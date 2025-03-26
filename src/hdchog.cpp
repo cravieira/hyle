@@ -21,7 +21,7 @@ void bsc_enc_grad_hv(
     GradBnb:
     for (size_t ori = 0; ori < HOG_ORIENTATIONS; ori++) {
         // Encode
-        hv_t mag_hv = mag_mem[features[ori]];
+        bsc_hv_t mag_hv = mag_mem[features[ori]];
         bsc_bnb<BnbAccWidth>(bundle_acc, ori_mem[ori], mag_hv, bundle_acc);
     }
     bsc_bnb_threshold<BnbAccWidth>(grad_hv, bundle_acc, HOG_ORIENTATIONS/2);
@@ -67,7 +67,10 @@ void cgr_enc_grad_hv(
         const cgr_hv_t (&mag_mem)[HOG_MAGNITUDES]
         ) {
     constexpr size_t BnbAccWidth = number_of_bits(HOG_ORIENTATIONS);
+
     cgr_bnb_acc_t<BnbAccWidth> bundle_acc;
+    #pragma HLS array_partition variable=bundle_acc dim=1
+
     cgr_init_bnb_acc_t<BnbAccWidth>(bundle_acc);
 
     GradBnb:
@@ -84,7 +87,10 @@ void cgr_enc_mat_hv(
         const cgr_hv_t (&grad_hvs)[HOG_CELLS]
         ) {
     constexpr size_t BnbAccWidth = number_of_bits(HOG_CELLS);
+
     cgr_bnb_acc_t<BnbAccWidth> bundle_acc;
+    #pragma HLS array_partition variable=bundle_acc dim=1
+
     cgr_init_bnb_acc_t<BnbAccWidth>(bundle_acc);
 
     CellBnb:
@@ -122,8 +128,8 @@ void hdchog_dp(
     dist_bank_t &acc_dists = s_acc_dists[datapath_id];
     hv_t query;
 
-    hdchog_bsc_enc(query, features, cell_mem, ori_mem, mag_mem);
-    //hdchog_cgr_enc(query, features, cell_mem, ori_mem, mag_mem);
+    //hdchog_bsc_enc(query, features, cell_mem, ori_mem, mag_mem);
+    hdchog_cgr_enc(query, features, cell_mem, ori_mem, mag_mem);
 
     dist_bank_t dists;
     distN<HDCHOG_CLASSES>(dists, query, am);

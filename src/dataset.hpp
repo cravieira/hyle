@@ -13,6 +13,7 @@ typedef std::vector<feat_t> data_t;
 typedef std::vector<data_t> dataset_t;
 typedef std::vector<class_t> label_t;
 
+#ifndef __SYNTHESIS__
 dataset_t read_dataset(const std::string& path);
 label_t read_labels(const std::string& path);
 
@@ -38,3 +39,4 @@ void segment_mem(const mem_data_t &parsed_mem, hv_t (&reshaped_mem)[HV_SEGMENTS]
         }
     }
 }
+#endif // __SYNTHESIS__
