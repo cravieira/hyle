@@ -1,3 +1,54 @@
+# Vitis-related helper functions
+com_launch_vitis() {
+    echo "vitis_hls $@\n"
+}
+
+com_parse_params() {
+    tcl_content=""
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            "-dim")
+                tcl_content+="set DIM $2\n"
+                shift # past argument
+                shift # past value
+                ;;
+            "-vsa")
+                vsa_class=$2
+                if [[ $2 == "cgr"* ]]; then
+                    IFS="-" read -r vsa_class cgr_points <<< "$2"
+                    tcl_content+="set CGR_POINTS $cgr_points\n"
+                fi
+                tcl_content+="set VSA $vsa_class\n"
+                shift # past argument
+                shift # past value
+                ;;
+            "-op")
+                tcl_content+="set OPERATION $2\n"
+                shift # past argument
+                shift # past value
+                ;;
+            "*")
+                echo "Unknown option $1"
+                exit 1
+                ;;
+        esac
+    done
+    echo $tcl_content
+}
+
+com_launch_synth() {
+    local tcl_script=$1
+    shift
+    local param_dir=$1
+    shift
+
+    param_file=$(mktemp "$param_dir/params.XXXX")
+    file_content=$(com_parse_params "$@")
+    printf "${file_content}" > $param_file
+    echo $(com_launch_vitis $tcl_script $param_file)
+}
+
+
 # Launch a batch of jobs in parallel using GNU parallel.
 # If any of the jobs fail, then all other jobs are immediately killed.
 # $1: Number of simultaneous jobs
