@@ -44,7 +44,7 @@ void bsc_enc_mat_hv(
     bsc_bnb_threshold<BnbAccWidth>(mat_hv, bundle_acc, HOG_CELLS/2);
 }
 
-void hdchog_bsc_enc(
+void hdchog_enc_bsc(
         bsc_hv_t &query,
         const hog_t &features,
         const bsc_hv_t (&cell_mem)[HOG_CELLS],
@@ -101,7 +101,7 @@ void cgr_enc_mat_hv(
     cgr_bnb_threshold<BnbAccWidth>(mat_hv, bundle_acc);
 }
 
-void hdchog_cgr_enc(
+void hdchog_enc_cgr(
         cgr_hv_t &query,
         const hog_t &features,
         const cgr_hv_t (&cell_mem)[HOG_CELLS],
@@ -116,6 +116,29 @@ void hdchog_cgr_enc(
     cgr_enc_mat_hv(query, cell_mem, grad_hvs);
 }
 
+// Overloaded encoding dispatchers
+void hdchog_enc(
+        bsc_hv_t &query,
+        const hog_t &features,
+        const bsc_hv_t (&cell_mem)[HOG_CELLS],
+        const bsc_hv_t (&ori_mem)[HOG_ORIENTATIONS],
+        const bsc_hv_t (&mag_mem)[HOG_MAGNITUDES]
+        ) {
+    #pragma HLS inline
+    hdchog_enc_bsc(query, features, cell_mem, ori_mem, mag_mem);
+}
+
+void hdchog_enc(
+        cgr_hv_t &query,
+        const hog_t &features,
+        const cgr_hv_t (&cell_mem)[HOG_CELLS],
+        const cgr_hv_t (&ori_mem)[HOG_ORIENTATIONS],
+        const cgr_hv_t (&mag_mem)[HOG_MAGNITUDES]
+        ) {
+    #pragma HLS inline
+    hdchog_enc_cgr(query, features, cell_mem, ori_mem, mag_mem);
+}
+
 void hdchog_dp(
         const hog_t &features,
         const hv_t (&cell_mem)[HOG_CELLS],
@@ -128,8 +151,8 @@ void hdchog_dp(
     dist_bank_t &acc_dists = s_acc_dists[datapath_id];
     hv_t query;
 
-    //hdchog_bsc_enc(query, features, cell_mem, ori_mem, mag_mem);
-    hdchog_cgr_enc(query, features, cell_mem, ori_mem, mag_mem);
+    // Dispatch
+    hdchog_enc(query, features, cell_mem, ori_mem, mag_mem);
 
     dist_bank_t dists;
     distN<HDCHOG_CLASSES>(dists, query, am);
