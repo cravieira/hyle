@@ -28,7 +28,7 @@ set cflags "-D__HV_DIMENSIONS__=${DIM} -D__HV_SEGMENT_SIZE__=${SEGMENT_SIZE} -D_
 set model_name "${VSA}"
 # Append the number of points used in CGR to the model name
 if { ${VSA} == "cgr" } {
-    set model_name "$${model_name}${CGR_POINTS}"
+    set model_name "${model_name}${CGR_POINTS}"
 }
 
 set bench_scenario ${OPERATION}
