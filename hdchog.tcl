@@ -1,5 +1,13 @@
 source tcl/common.tcl
 
+# General project variables
+set RUN_SIM false
+set RUN_HLS_SYNTH false
+set RUN_VIVADO_SYNTH false
+set RUN_VIVADO_IMPL false
+set PROJECT_NAME ""
+set CLK_PERIOD 10
+
 # Define HV constants
 set DIM 1000
 set SEGMENT_SIZE 1000
@@ -30,6 +38,11 @@ if { ${VSA} == "cgr" } {
 set cflags "-D__HV_DIMENSIONS__=${DIM} -D__HV_SEGMENT_SIZE__=${SEGMENT_SIZE} -D__SEGMENT_DATAPATHS__=${DATAPATHS} ${define_VSA} -D__CGR_POINTS__=${CGR_POINTS}"
 
 open_project "vitis_hdchog-${model_name}-d${DIM}-seg_size${SEGMENT_SIZE}-dp${DATAPATHS}" -reset
+set proj_name "vitis_hdchog-${model_name}-d${DIM}-seg_size${SEGMENT_SIZE}-dp${DATAPATHS}"
+if { $PROJECT_NAME != "" } {
+    set proj_name ${PROJECT_NAME}
+}
+open_project ${proj_name} -reset
 
 add_files -cflags ${cflags} -tb "src/hdchog_tb.cpp"
 
@@ -44,13 +57,11 @@ add_files -cflags ${cflags} "src/hdchog.cpp"
 add_files -cflags ${cflags} -tb "src/dataset.hpp"
 add_files -cflags ${cflags} -tb "src/dataset.cpp"
 
-set TOP "cgr_enc_mat_hv"
-set TOP "cgr_enc_grad_hv"
 set TOP "hdchog"
 set_top ${TOP}
 open_solution "solution1"
 com_set_part
-create_clock -period 10
+create_clock -period ${CLK_PERIOD}
 
 # voicehd_enc_seg_dp() #
 set_directive_unroll -factor ${DATAPATHS} hdchog/HDCHOG_Segment
@@ -68,15 +79,22 @@ set mag_hv_path "${serial_dir}/hdchog-${model_name}-d${DIM}-mag_hv.txt"
 set am_path "${serial_dir}/hdchog-${model_name}-d${DIM}-am.txt"
 set ds_path "${serial_dir}/hdchog-test_data.txt"
 set label_path "${serial_dir}/hdchog-test_label.txt"
-csim_design -argv "${cell_hv_path} ${ori_hv_path} ${mag_hv_path} ${am_path} ${ds_path} ${label_path}"
-#csim_design -O -argv "${cell_hv_path} ${ori_hv_path} ${mag_hv_path} ${am_path} ${ds_path} ${label_path}"
+if {bool($RUN_SIM)} {
+    csim_design -argv "${cell_hv_path} ${ori_hv_path} ${mag_hv_path} ${am_path} ${ds_path} ${label_path}"
+}
 #csim_design -setup
 
 #csynth_design -dump_cfg -synthesis_check
-csynth_design
+if {bool($RUN_HLS_SYNTH)} {
+    csynth_design
+}
 
 #cosim_design -O
 
-#export_design -flow syn
-#export_design -flow impl
+if {bool($RUN_VIVADO_SYNTH)} {
+    export_design -flow syn
+}
+if {bool($RUN_VIVADO_IMPL)} {
+    export_design -flow impl
+}
 
