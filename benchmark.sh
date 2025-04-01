@@ -25,7 +25,7 @@ benchmark_operations() {
             done
         done
     done
-    printf "$cmd"
+    echo "$cmd"
 }
 
 cmd=$(benchmark_operations)
