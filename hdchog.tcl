@@ -14,19 +14,15 @@ set SEGMENT_SIZE 1000
 set DATAPATHS 1; # Number of parallel segment datapaths
 set VSA "bsc"
 set CGR_POINTS 4
-set script_path [ file dirname [ file normalize [ info script ] ] ]; # Path of this script file
 
-if { $argc != 0 } {
-    set DATAPATHS [lindex $argv 0]
+# Is there a custom parameter file?
+if {$argc == 1} {
+    source [lindex $argv 0]
 }
+set valid_vsa {"bsc" "cgr"}
+com_assert_in $VSA $valid_vsa
 
-puts "Using ${DATAPATHS} datapaths"
-puts "argv ${argv} argc ${argc}"
-
-set SEGMENTS [expr $DIM / $SEGMENT_SIZE]
-
-set valid_VSA {"bsc" "cgr"}
-com_assert_in $VSA $valid_VSA
+set script_path [ file dirname [ file normalize [ info script ] ] ]; # Path of this script file
 
 set model_name "${VSA}"
 set define_VSA "-D__VSA_[string toupper $VSA]__"; # Define VSA to be used in app

@@ -12,6 +12,11 @@ com_parse_params() {
                 shift # past argument
                 shift # past value
                 ;;
+            "-seg-size")
+                tcl_content+="set SEGMENT_SIZE $2\n"
+                shift # past argument
+                shift # past value
+                ;;
             "-vsa")
                 vsa_class=$2
                 if [[ $2 == "cgr"* ]]; then
@@ -24,6 +29,36 @@ com_parse_params() {
                 ;;
             "-op")
                 tcl_content+="set OPERATION $2\n"
+                shift # past argument
+                shift # past value
+                ;;
+            "-datapath")
+                tcl_content+="set DATAPATHS $2\n"
+                shift # past argument
+                shift # past value
+                ;;
+            "-clk-period")
+                tcl_content+="set CLK_PERIOD $2\n"
+                shift # past argument
+                shift # past value
+                ;;
+            "-hls-synth")
+                tcl_content+="set RUN_HLS_SYNTH $2\n"
+                shift # past argument
+                shift # past value
+                ;;
+            "-vivado-synth")
+                tcl_content+="set RUN_VIVADO_SYNTH $2\n"
+                shift # past argument
+                shift # past value
+                ;;
+            "-vivado-impl")
+                tcl_content+="set RUN_VIVADO_IMPL $2\n"
+                shift # past argument
+                shift # past value
+                ;;
+            "-project-name")
+                tcl_content+="set PROJECT_NAME $2\n"
                 shift # past argument
                 shift # past value
                 ;;
@@ -68,6 +103,7 @@ function parallel_launch() {
     trap "rm $PROCFILE" QUIT TERM PWR EXIT
 
     echo "$jobs" > $PROCFILE
-    printf "$cmds" | parallel --verbose -j"$PROCFILE" --halt now,fail=1
+    #printf "$cmds" | parallel --verbose -j"$PROCFILE" --halt now,fail=1
+    printf "$cmds" | parallel --verbose -j"$PROCFILE"
 }
 
