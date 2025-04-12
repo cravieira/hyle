@@ -12,7 +12,7 @@ JOBS=4 # Number of parallel jobs to be executed
 VSAS=""
 DIMS=""
 DATAPATHS=""
-SEGMENT_SIZE="256"
+SEGMENT_SIZE=""
 CLOCK_PERIODS="5 10 15"
 
 MAIN_TCL="hdchog.tcl"
@@ -53,21 +53,27 @@ dse() {
 }
 
 cmd=""
+# CGR
 VSAS="cgr-4"
 DIMS="2048"
+SEGMENT_SIZE=256
 DATAPATHS="1 2 4 8"
-DATAPATHS="1"
 cmd+=$(dse)
 
+# Narrower CGR datapaths
+DATAPATHS="1"
 SEGMENT_SIZE=128
 cmd+=$(dse)
 SEGMENT_SIZE=64 # This design is too small compared to the BSC designs evaluated
 cmd+=$(dse)
 
+# BSC
 VSAS="bsc"
 DIMS="8192 16384 32768"
+DIMS="16384 32768"
 SEGMENT_SIZE=256
 DATAPATHS="1 2 4 8 16"
-#DATAPATHS="32" # Failing in Vivado implementation due to high number of IP IOs
+#DATAPATHS="32" # Failing in Vivado implementation due to high number of IOs in the IP
 cmd+=$(dse)
+
 printf "$cmd"

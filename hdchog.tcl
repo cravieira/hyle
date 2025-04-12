@@ -33,7 +33,7 @@ if { ${VSA} == "cgr" } {
 
 set cflags "-D__HV_DIMENSIONS__=${DIM} -D__HV_SEGMENT_SIZE__=${SEGMENT_SIZE} -D__SEGMENT_DATAPATHS__=${DATAPATHS} ${define_VSA} -D__CGR_POINTS__=${CGR_POINTS}"
 
-open_project "vitis_hdchog-${model_name}-d${DIM}-seg_size${SEGMENT_SIZE}-dp${DATAPATHS}" -reset
+#open_project "vitis_hdchog-${model_name}-d${DIM}-seg_size${SEGMENT_SIZE}-dp${DATAPATHS}";# -reset
 set proj_name "vitis_hdchog-${model_name}-d${DIM}-seg_size${SEGMENT_SIZE}-dp${DATAPATHS}"
 if { $PROJECT_NAME != "" } {
     set proj_name ${PROJECT_NAME}
@@ -78,7 +78,6 @@ set label_path "${serial_dir}/hdchog-test_label.txt"
 if {bool($RUN_SIM)} {
     csim_design -argv "${cell_hv_path} ${ori_hv_path} ${mag_hv_path} ${am_path} ${ds_path} ${label_path}"
 }
-#csim_design -setup
 
 #csynth_design -dump_cfg -synthesis_check
 if {bool($RUN_HLS_SYNTH)} {
