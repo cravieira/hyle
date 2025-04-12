@@ -12,64 +12,6 @@
 #include "voicehd.hpp"
 #include "dataset.hpp"
 
-// Dataset loaders
-// Memory initializers
-std::vector<hv_t> read_mem(
-        const std::string &path
-        ) {
-    // Parse line and create HV from it
-    std::ifstream f(path);
-    if (!f.is_open()) {
-        throw std::runtime_error("Unable to open file: " + path);
-    }
-
-    std::vector<hv_t> mem;
-    std::string line;
-
-    // Parse a single line
-    while (std::getline(f, line)) {
-        int32_t i; // Element buffer
-        std::vector<int32_t> buffer; // Line buffer
-
-        std::stringstream ss(line);
-        while (ss >> i) {
-            buffer.emplace_back(i);
-        }
-
-        // Convert the read data into an HV and push it to the memory container
-        hv_t hv;
-        if (buffer.size() != DIM) {
-            std::string msg = "Failed to parse file " + path +". Number of read dimensions (" + std::to_string(buffer.size()) + ") is not equal to constant DIM (" + std::to_string(DIM) + ")";
-            throw std::runtime_error(msg);
-        }
-
-        for (size_t i = 0; i < DIM; i++) {
-            hv[i] = static_cast<hv_elem_t>(buffer[i]);
-        }
-
-        mem.emplace_back(hv);
-    }
-
-    return mem;
-}
-
-template<size_t N>
-std::array<hv_t, N> init_mem(const std::string &path) {
-    // Read a HDC memory file
-    auto file_data = read_mem(path);
-    if (file_data.size() != N) {
-        std::string msg = "Number of HVs read from file \"" + path + "\" is different from the expected: " + std::to_string(N);
-        throw std::runtime_error(msg);
-    }
-
-    // Convert the std::vector data to hls::vector
-    std::array<hv_t, N> mem;
-    for (int i = 0; i < N; i++) {
-        mem[i] = file_data[i];
-    }
-
-    return mem;
-}
 
 int main(int argc, char *argv[]) {
     auto im_data = parse_mem_file(argv[1]);
