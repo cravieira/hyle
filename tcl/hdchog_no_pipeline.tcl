@@ -11,8 +11,10 @@ set_directive_pipeline -off ${VSA}_enc_grad_hv/GradBnb
 set_directive_pipeline -off ${VSA}_enc_mat_hv/CellBnb
 
 # Inline sub-encode functions
-#set_directive_inline ${VSA}_enc_grad_hv
-#set_directive_inline ${VSA}_enc_cell_hv
+set_directive_inline ${VSA}_enc_grad_hv
+set_directive_inline ${VSA}_enc_cell_hv
+set_directive_bind_storage -type ram_1p hdchog_enc_bsc grad_hvs
+#set_directive_array_partition_ -dim 1 ram_1p hdchog_enc_bsc grad_hvs
 
 set_directive_inline ${VSA}_bnb_threshold
 set_directive_inline ${VSA}_bnb
