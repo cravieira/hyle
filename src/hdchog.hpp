@@ -1,3 +1,5 @@
+#include <ap_int.h>
+
 #include "vsa.hpp"
 #include "bsc.hpp"
 #include "cgr.hpp"
@@ -9,6 +11,7 @@ constexpr int HOG_MAGNITUDES = 11;
 constexpr int HOG_CELLS = 36;
 constexpr int HDCHOG_CLASSES = 10; // Classes in FashionMNIST
 
+using feat_t = ap_uint<4>; // The magnitudes range is [0, 10]
 using orientation_t = feat_t;
 using cell_t = orientation_t[HOG_ORIENTATIONS];
 using hog_t = cell_t[HOG_CELLS];

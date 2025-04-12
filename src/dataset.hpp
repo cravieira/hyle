@@ -8,8 +8,8 @@
 #include "vsa.hpp" // Define standard hv_t used in simulation
 
 using class_t = uint8_t;
-using feat_t = uint8_t;
-typedef std::vector<feat_t> data_t;
+//using feat_t = uint8_t;
+typedef std::vector<uint32_t> data_t;
 typedef std::vector<data_t> dataset_t;
 typedef std::vector<class_t> label_t;
 
