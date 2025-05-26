@@ -45,6 +45,6 @@ set_directive_inline bsc_distN
 # TESTES
 # Datapath instantiation. Choose if datapaths are instantiated explicitely or implicitely using inlining. Mutually exclusive.
 #set_directive_inline voicehd_enc_seg_dp; # Commented, but can be used in the final version to increase optimizations a little
-set_directive_function_instantiate voicehd_enc_seg_dp datapath_id
+#set_directive_function_instantiate voicehd_enc_seg_dp datapath_id
 
 set_directive_array_partition -dim 1 voicehd_enc_seg_dp features
