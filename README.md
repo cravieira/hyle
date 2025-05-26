@@ -66,8 +66,8 @@ BSC and CGR classes are tested to ensure correctness. The tests and their respec
 To run tests, simply call Vitis passing a test runner file, e.g., `vitis_hls test_bsc.tcl`.
 
 ## References
-[1]: Hyperdimensional Computing: An Introduction to Computing in Distributed Representation with High-Dimensional Random Vectors
-[2]: Understanding hyperdimensional computing for parallel single-pass learning
-[3]: VoiceHD: Hyperdimensional Computing for Efficient Speech Recognition
-[4]: HDCOG: A Lightweight Hyperdimensional Computing Framework with Feature Extraction
-[5]: https://www.gnu.org/software/parallel/
+\[1\]: Hyperdimensional Computing: An Introduction to Computing in Distributed Representation with High-Dimensional Random Vectors
+\[2\]: Understanding hyperdimensional computing for parallel single-pass learning
+\[3\]: VoiceHD: Hyperdimensional Computing for Efficient Speech Recognition
+\[4\]: HDCOG: A Lightweight Hyperdimensional Computing Framework with Feature Extraction
+\[5\]: https://www.gnu.org/software/parallel/
