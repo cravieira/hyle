@@ -36,15 +36,5 @@ set_directive_inline cgr_dist
 set_directive_unroll cgr_dist/AddReduce
 set_directive_inline cgr_distN
 
-# TESTS
-# Datapath instantiation. Choose if datapaths are instantiated explicitely or implicitely using inlining. Mutually exclusive.
-#set_directive_inline voicehd_enc_seg_dp; # Commented, but can be used in the
-#final version to increase optimizations a little.
-# Update: using inline voicehd_enc_seg_dp may not be the best decision as some
-# configurations do not work as expected. For instance, cgr4-d1024-ss256-dp2
-# results in doubled latency, as one datapath works after another and not
-# simultaneously.
-#set_directive_function_instantiate voicehd_enc_seg_dp datapath_id
-
 set_directive_array_partition -dim 1 voicehd_enc_seg_dp features
 

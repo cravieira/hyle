@@ -36,7 +36,6 @@ if { ${VSA} == "cgr" } {
 
 set cflags "-D__HV_DIMENSIONS__=${DIM} -D__HV_SEGMENT_SIZE__=${SEGMENT_SIZE} -D__SEGMENT_DATAPATHS__=${DATAPATHS} ${define_VSA} -D__CGR_POINTS__=${CGR_POINTS}"
 
-#open_project "vitis_voicehd-${model_name}-d${DIM}-seg_size${SEGMENT_SIZE}-dp${DATAPATHS}";# -reset
 set proj_name "vitis_voicehd-${model_name}-d${DIM}-seg_size${SEGMENT_SIZE}-dp${DATAPATHS}"
 if { $PROJECT_NAME != "" } {
     set proj_name ${PROJECT_NAME}
@@ -70,9 +69,6 @@ set_directive_function_instantiate voicehd_enc_seg_dp datapath_id
 
 # Accelerator optimizations. Pick one!
 #source tcl/voicehd_bsc_opt.tcl; # Vertical unrolled design
-#source tcl/voicehd_bsc_bnb.tcl; # Multi-cycle encoding with fused bind-and-bundle
-#source tcl/voicehd_cgr_bnb.tcl; # Multi-cycle encoding with fused bind-and-bundle for CGR
-# TODO: Unify bnb design into a single file
 source tcl/voicehd_${VSA}_bnb.tcl; # Multi-cycle encoding with fused bind-and-bundle for CGR
 
 set serial_dir "${script_path}/serial"
@@ -88,8 +84,6 @@ if {bool($RUN_SIM)} {
 if {bool($RUN_HLS_SYNTH)} {
     csynth_design
 }
-
-#cosim_design -O
 
 if {bool($RUN_VIVADO_SYNTH)} {
     export_design -flow syn
