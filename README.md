@@ -2,7 +2,7 @@
 
 Hyle is an HLS-based framework for building HDC accelerators based on Vitis HLS. It eases the implementation of HDC hardware by providing a clean API of HDC operations for Binary Spatter Codes (BSC)[^1] and Cyclic Group Representations (CGR)[^2].
 1. **Versatile**: Hyle is the first tool to accelerate the CGR class while also supporting the BSC class. Since both classes must implement the same HDC operations, they have very similar APIs. Users can quickly evaluate their design under different HDC classes.
-2.  **Tested**: Each HDC operation and class provided is tested, avoiding the burden of reimplementing them.
+2. **Tested**: Each HDC operation and class provided is tested, avoiding the burden of reimplementing them.
 3. **Performant**: By building accelerators upon HDC operations, a user can tune the microarchitecture generation with HLS pragmas according to their needs.
 4. **Extendable**: Working at the HLS level instead of HDL (Verilog or VHDL) allows users to quickly extend the library according to their projects.
 
@@ -64,6 +64,23 @@ BSC and CGR classes are tested to ensure correctness. The tests and their respec
 ```
 
 To run tests, simply call Vitis passing a test runner file, e.g., `vitis_hls test_bsc.tcl`.
+
+
+## Citation
+
+If you find this repository useful in your research, please cite our [ICCAD](https://ieeexplore.ieee.org/document/11240971) paper:
+```
+@INPROCEEDINGS{11240971,
+  author={Vieira, Caio and Schneider Beck, Antonio Carlos},
+  booktitle={2025 IEEE/ACM International Conference On Computer Aided Design (ICCAD)},
+  title={Hyle: An HLS Framework for Hyperdimensional Computing Accelerators on FPGAs},
+  year={2025},
+  volume={},
+  number={},
+  pages={1-9},
+  keywords={Accuracy;Design automation;Computational modeling;Machine learning;Throughput;Hardware;Vectors;Proposals;Field programmable gate arrays;Standards;Hyperdimensional Computing (HDC);Accelerator;FPGA},
+  doi={10.1109/ICCAD66269.2025.11240971}}
+```
 
 ## References
 [^1]: Hyperdimensional Computing: An Introduction to Computing in Distributed Representation with High-Dimensional Random Vectors
