@@ -1,4 +1,4 @@
-#include "cgr.hpp"
+#include "hyle/cgr.hpp"
 
 #include <cstdint>
 #include <hls_vector.h>

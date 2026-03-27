@@ -1,4 +1,4 @@
-#include "bsc.hpp"
+#include "hyle/bsc.hpp"
 #include <cstddef>
 
 using namespace vsa::bsc;
