@@ -2,20 +2,16 @@
 open_project vitis_test_cgr -reset
 
 # Define testbench constants
-set cflags "-D__HV_DIMENSIONS__=10 -D__HV_SEGMENT_SIZE__=10"
+set HYLE_VSA "cgr"
+set HYLE_DIMENSIONS 10
+set HYLE_SEGMENT_SIZE 10
 
-add_files -tb -cflags ${cflags} "src/cgr_tb.cpp"
-add_files -tb -cflags ${cflags} "src/common.hpp"
-add_files -tb -cflags ${cflags} "src/defines.hpp"
+source ./hyle.tcl
 
-add_files -cflags ${cflags} "src/cgr.cpp"
-add_files -cflags ${cflags} "src/cgr.hpp"
+add_files -tb -cflags ${HYLE_CFLAGS} "src/cgr_tb.cpp"
 
 set_top cgr_bind; # Set any top function
 open_solution "solution1"
 set_part  {xc7z020clg400-1}
 create_clock -period 10
 csim_design
-
-#csynth_design
-#export_design -flow syn

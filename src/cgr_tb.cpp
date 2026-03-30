@@ -4,7 +4,7 @@
 #include <ap_int.h>
 #include <hls_vector.h>
 
-#include "cgr.hpp"
+#include "hyle/cgr.hpp"
 
 using namespace vsa::cgr;
 
@@ -107,13 +107,14 @@ void test_bnb() {
     hv_t out;
     hv_t hvs[] = {a, b, c, d, e, f};
 
-    bnb_acc_t acc;
-    init_bnb_acc_t(acc);
+    constexpr size_t bnb_width = 4;
+    bnb_acc_t<bnb_width> acc;
+    init_bnb_acc_t<bnb_width>(acc);
 
-    bnb(acc, a, b, acc);
-    bnb(acc, c, d, acc);
-    bnb(acc, e, f, acc);
-    bnb_threshold(out, acc);
+    bnb<bnb_width>(acc, a, b, acc);
+    bnb<bnb_width>(acc, c, d, acc);
+    bnb<bnb_width>(acc, e, f, acc);
+    bnb_threshold<bnb_width>(out, acc);
 
     if (out != out_gold) {
         std::cout << a << std::endl;
