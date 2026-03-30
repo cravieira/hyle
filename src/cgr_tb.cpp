@@ -96,6 +96,33 @@ void test_bundleN() {
     };
 }
 
+void test_bundleN_directional() {
+    hv_t a =        {3, 1, 0, 3, 2, 2, 3, 0, 3, 2};
+    hv_t b =        {0, 1, 3, 3, 2, 2, 3, 0, 0, 2};
+    hv_t c =        {0, 1, 0, 3, 2, 2, 1, 3, 1, 2};
+    hv_t d =        {3, 2, 1, 2, 3, 2, 1, 3, 2, 2};
+    hv_t e =        {2, 2, 3, 2, 3, 3, 3, 1, 3, 2};
+    hv_t f =        {1, 2, 3, 2, 1, 1, 1, 1, 0, 2};
+    hv_t g =        {3, 2, 0, 1, 1, 0, 2, 2, 1, 2};
+    hv_t h =        {1, 2, 0, 1, 2, 0, 0, 2, 1, 2};
+    hv_t out_gold = {3, 2, 0, 2, 2, 2, 1, 0, 1, 2};
+    hv_t out;
+    hv_t hvs[] = {a, b, c, d, e, f, g, h};
+
+    bundleN(out, hvs);
+    if (out != out_gold) {
+        std::cout << a << std::endl;
+        std::cout << b << std::endl;
+        std::cout << c << std::endl;
+        std::cout << d << std::endl;
+        std::cout << e << std::endl;
+        std::cout << f << std::endl;
+        std::cout << g << std::endl;
+        std::cout << h << std::endl;
+        std::cout << out << std::endl;
+    };
+}
+
 void test_bnb() {
     hv_t a =        {1, 1, 2, 3, 1, 0, 1, 3, 1, 1};
     hv_t b =        {2, 0, 3, 3, 2, 0, 1, 3, 2, 3};
@@ -186,6 +213,7 @@ int main () {
     test_bindN();
     test_bundle();
     test_bundleN();
+    test_bundleN_directional();
     test_bnb();
     test_dist();
     test_distN();
