@@ -95,11 +95,12 @@ void inline cgr_bundleN(cgr_hv_t &out, const cgr_hv_t (&hvs)[N]) {
 template<size_t N>
 void inline cgr_bundleN_directional(cgr_hv_t &out, const cgr_hv_t (&hvs)[N]) {
     constexpr size_t acc_bits = number_of_bits(N);
-    using acc_elem_t = ap_uint<acc_bits>;
-    using acc_bank_t = hls::vector<acc_elem_t, __CGR_POINTS__>;
-    using acc_t = acc_elem_t[HV_SEGMENT_SIZE][_cgr_bits_per_dim-1];
+    using acc_elem_t = ap_int<acc_bits+1>; // Use +1 to support max positive or negative accumulation
+    constexpr size_t bank_size = _cgr_bits_per_dim; // Number of accumulators required per vector dimension
+    using acc_t = acc_elem_t[HV_SEGMENT_SIZE][bank_size];
 
     acc_t accs;
+    #pragma HLS array_partition variable=accs dim=1
     parallel_reset(accs);
 
     CgrBundleVec:
@@ -108,18 +109,40 @@ void inline cgr_bundleN_directional(cgr_hv_t &out, const cgr_hv_t (&hvs)[N]) {
         for (int e = 0; e < HV_SEGMENT_SIZE; e++) {
             #pragma HLS unroll
             cgr_hv_elem_t elem = hvs[v][e];
-            ap_uint<_cgr_bits_per_dim-1> ind = elem.range(_cgr_bits_per_dim-2, 0);
+            ap_uint<_cgr_bits_per_dim-1> ind = elem.range(_cgr_bits_per_dim-1, 0);
             bool msb = elem[_cgr_bits_per_dim-1];
             accs[e][ind] += msb ? -1 : 1;
         }
     }
 
     // Threshold to compute the bundled HV
+    Threshold:
     for (int i = 0; i < HV_SEGMENT_SIZE; i++) {
         #pragma HLS unroll
+        bool negative[bank_size];
+        acc_elem_t abs_bank[bank_size]; // TODO: Using int, but could save one bit by using uint
+
+        // Threshold a single dimension
+        ThresholdDimension:
+        for (int r = 0; r < bank_size; r++) {
+            #pragma HLS unroll
+
+            acc_elem_t elem = accs[i][r];
+            if (elem < 0) { // Or just check the MSB since acc_elem_t is integer
+                negative[r] = 1;
+                abs_bank[r] = -elem;
+            }
+            else {
+                negative[r] = 0;
+                abs_bank[r] = elem;
+            }
+        }
+
         // TODO: Maybe size_t could be optimized to return the exact amount of bits only
-        size_t argmax;
-        parallel_argmax(argmax, accs[i]);
+        size_t argmax_out;
+        parallel_argmax(argmax_out, abs_bank);
+        cgr_hv_elem_t argmax = argmax_out;
+        argmax.set_bit(_cgr_bits_per_dim-1, negative[argmax]); // Set the MSB if the result in the accumulator was negative
         out[i] = argmax;
     }
 }
