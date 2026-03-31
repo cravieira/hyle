@@ -69,6 +69,7 @@ void inline cgr_bundleN(cgr_hv_t &out, const cgr_hv_t (&hvs)[N]) {
     using acc_elem_t = ap_uint<acc_bits>;
     using acc_bank_t = hls::vector<acc_elem_t, __CGR_POINTS__>;
     cgr_bnb_acc_t<acc_bits> acc_bank_vec;
+    #pragma HLS array_partition variable=acc_bank_vec dim=1
 
     cgr_init_bnb_acc_t<acc_bits>(acc_bank_vec);
 
