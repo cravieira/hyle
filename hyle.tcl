@@ -32,12 +32,15 @@ if {![info exists HYLE_VSA]} {
     puts "Please define HYLE_VSA variable before sourcing hyle.tcl"
     exit 1
 }
+if {![info exists HYLE_CGR_POINTS]} {
+    set HYLE_CGR_POINTS 4
+}
 set valid_vsa {"bsc" "cgr" "BSC" "CGR"}
 com_assert_in $HYLE_VSA $valid_vsa
 
 set define_VSA "-D__VSA_[string toupper $HYLE_VSA]__"; # Define VSA to be used in app
 
-set HYLE_DEFINES "-D__HV_DIMENSIONS__=${HYLE_DIMENSIONS} -D__HV_SEGMENT_SIZE__=${HYLE_SEGMENT_SIZE} ${define_VSA}"
+set HYLE_DEFINES "-D__HV_DIMENSIONS__=${HYLE_DIMENSIONS} -D__HV_SEGMENT_SIZE__=${HYLE_SEGMENT_SIZE} ${define_VSA} -D__CGR_POINTS__=${HYLE_CGR_POINTS}"
 set HYLE_CFLAGS "-I${HYLE_PUBLIC_HEADERS} ${HYLE_DEFINES}"
 
 # Add hyle srcs into parent project's build list
