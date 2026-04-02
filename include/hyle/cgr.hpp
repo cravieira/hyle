@@ -20,6 +20,7 @@ static_assert(
         "Define __CGR_POINTS__ is not a power of 2!"
         );
 
+constexpr size_t HYLE_CGR_POINTS = __CGR_POINTS__;
 constexpr size_t _cgr_bits_per_dim = number_of_bits(__CGR_POINTS__-1);
 using cgr_hv_elem_t = ap_uint<number_of_bits(_cgr_bits_per_dim)>;
 using cgr_hv_t = hls::vector<cgr_hv_elem_t, HV_SEGMENT_SIZE>;
@@ -58,6 +59,21 @@ void inline cgr_bindN(cgr_hv_t &out, const cgr_hv_t (&hvs)[N]) {
     BindLoop:
     for (size_t i = 2; i < N; i++) {
         out += hvs[i];
+    }
+}
+
+template<typename T>
+void cgr_mode_threshold(cgr_hv_t &out, const T (&acc)[HV_SEGMENT_SIZE][HYLE_CGR_POINTS]) {
+    #pragma HLS inline
+    // Threshold to compute the bundled HV
+    Threshold:
+    for (int i = 0; i < HV_SEGMENT_SIZE; i++) {
+        #pragma HLS unroll
+        // TODO: Maybe size_t could be optimized to return the exact amount of
+        // bits only
+        size_t argmax;
+        parallel_argmax(argmax, acc[i]);
+        out[i] = argmax;
     }
 }
 
@@ -147,20 +163,12 @@ void inline cgr_bundleN_directional(cgr_hv_t &out, const cgr_hv_t (&hvs)[N]) {
     }
 }
 
-
 template<size_t AccBnbWidth>
 void cgr_bnb_threshold(cgr_hv_t &out, const cgr_bnb_acc_t<AccBnbWidth> &acc) {
+    #pragma HLS inline
     // Threshold to compute the bundled HV
-    for (int i = 0; i < BNB_WIDTH; i++) {
-        #pragma HLS unroll
-        // TODO: Maybe size_t could be optimized to return the exact amount of
-        // bits only
-        size_t argmax;
-        parallel_argmax(argmax, acc[i]);
-        out[i] = argmax;
-    }
+    cgr_mode_threshold(out, acc);
 }
-
 
 template<size_t AccBnbWidth>
 void cgr_bnb(
