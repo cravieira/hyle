@@ -22,7 +22,7 @@ static_assert(
 
 constexpr size_t HYLE_CGR_POINTS = __CGR_POINTS__;
 constexpr size_t _cgr_bits_per_dim = number_of_bits(__CGR_POINTS__-1);
-using cgr_hv_elem_t = ap_uint<number_of_bits(_cgr_bits_per_dim)>;
+using cgr_hv_elem_t = ap_uint<_cgr_bits_per_dim>;
 using cgr_hv_t = hls::vector<cgr_hv_elem_t, HV_SEGMENT_SIZE>;
 // An uint big enough to store the number of dimensions used in the application.
 using cgr_dim_t = ap_uint<number_of_bits(DIM)>;
