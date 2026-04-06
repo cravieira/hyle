@@ -14,7 +14,7 @@ using namespace vsa::cgr;
 std::ostream& operator<<(std::ostream& os, const hv_t v) {
     for (auto it = v.cbegin(); it != v.cend(); it++) {
         //os << std::hex << std::setw(1) << std::setfill('0') << *it;
-        os << *it;
+        os << *it << " ";
     }
 
     return os;
