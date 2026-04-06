@@ -62,6 +62,45 @@ void inline cgr_bindN(cgr_hv_t &out, const cgr_hv_t (&hvs)[N]) {
     }
 }
 
+template<size_t N>
+void cgr_bindN(cgr_hv_t &out, const cgr_hv_t *(&hvs)[N]) {
+    static_assert(
+            N > 2,
+            "Number of vectors in \"hvs\" collection must be greater than 2");
+
+    out = *hvs[0] + *hvs[1];
+    BindLoop:
+    for (size_t i = 2; i < N; i++) {
+        out += *hvs[i];
+    }
+}
+
+template<size_t N>
+void inline cgr_unbindN(cgr_hv_t &out, const cgr_hv_t (&hvs)[N]) {
+    static_assert(
+            N > 2,
+            "Number of vectors in \"hvs\" collection must be greater than 2");
+
+    out = hvs[0] - hvs[1];
+    UnbindLoop:
+    for (size_t i = 2; i < N; i++) {
+        out -= hvs[i];
+    }
+}
+
+template<size_t N>
+void cgr_unbindN(cgr_hv_t &out, const cgr_hv_t *(&hvs)[N]) {
+    static_assert(
+            N > 2,
+            "Number of vectors in \"hvs\" collection must be greater than 2");
+
+    out = *hvs[0] - *hvs[1];
+    UnbindLoop:
+    for (size_t i = 2; i < N; i++) {
+        out -= *hvs[i];
+    }
+}
+
 template<typename T>
 void cgr_mode_threshold(cgr_hv_t &out, const T (&acc)[HV_SEGMENT_SIZE][HYLE_CGR_POINTS]) {
     #pragma HLS inline
@@ -268,6 +307,24 @@ template<size_t N>
 void inline bindN(hv_t &out, const hv_t (&hvs)[N]) {
     #pragma HLS inline
     cgr_bindN(out, hvs);
+}
+
+template<size_t N>
+void inline bindN(hv_t &out, const hv_t *(&hvs)[N]) {
+    #pragma HLS inline
+    cgr_bindN(out, hvs);
+}
+
+template<size_t N>
+void inline unbindN(hv_t &out, const hv_t (&hvs)[N]) {
+    #pragma HLS inline
+    cgr_unbindN(out, hvs);
+}
+
+template<size_t N>
+void unbindN(hv_t &out, const hv_t *(&hvs)[N]) {
+    #pragma HLS inline
+    cgr_unbindN(out, hvs);
 }
 
 void inline bundle(hv_t &out, const hv_t &a, const hv_t &b, const hv_t &c) {
