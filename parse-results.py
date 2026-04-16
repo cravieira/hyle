@@ -8,39 +8,49 @@ the data into a single .csv file.
 import argparse
 import csv
 import json
+import sys
 from pathlib import Path
 import xml.etree.ElementTree as ET
 
 def parse_project(path: str):
     """docstring for parse_project"""
-    d = dict()
-    d['name'] = Path(path).stem
+    try:
+        d = dict()
+        d['name'] = Path(path).stem
 
-    # Csynth report
-    json_path = f'{path}/solution1/solution1_data.json'
-    with open(json_path, 'r') as f:
-        csynth = json.load(f)
-    d['top'] = csynth['Top']
-    d['latency'] = csynth['ClockInfo']['Latency']
-    d['II'] = csynth['ClockInfo']['II']
-    d['is_combinational'] = csynth['ClockInfo']['IsCombinational']
+        # Csynth report
+        json_path = f'{path}/solution1/solution1_data.json'
+        with open(json_path, 'r') as f:
+            csynth = json.load(f)
+        d['top'] = csynth['Top']
+        d['latency'] = csynth['ClockInfo']['Latency']
 
-    # Implementation report
-    xml_file = f'{path}/solution1/impl/report/verilog/export_impl.xml'
-    tree = ET.parse(xml_file)
-    root = tree.getroot()
+        # Handle special cases where the II is "x ~ y" by using the largest "y" value
+        ii_str = csynth['ClockInfo']['II']
+        if '~' in ii_str:
+            ii_str = ii_str.split('~')[-1]
+        d['II'] = ii_str
+        d['is_combinational'] = csynth['ClockInfo']['IsCombinational']
 
-    d['achieved_cp'] = root.find('TimingReport/AchievedClockPeriod').text
-    d['target_cp'] = root.find('TimingReport/TargetClockPeriod').text
-    d['cp_met'] = root.find('TimingReport/TIMING_MET').text
-    d['bram'] = root.find('AreaReport/Resources/BRAM').text
-    d['clb'] = root.find('AreaReport/Resources/CLB').text
-    d['dsp'] = root.find('AreaReport/Resources/DSP').text
-    d['ff'] = root.find('AreaReport/Resources/FF').text
-    d['latch'] = root.find('AreaReport/Resources/LATCH').text
-    d['lut'] = root.find('AreaReport/Resources/LUT').text
+        # Implementation report
+        xml_file = f'{path}/solution1/impl/report/verilog/export_impl.xml'
+        tree = ET.parse(xml_file)
+        root = tree.getroot()
 
-    return d
+        d['achieved_cp'] = root.find('TimingReport/AchievedClockPeriod').text
+        d['target_cp'] = root.find('TimingReport/TargetClockPeriod').text
+        d['cp_met'] = root.find('TimingReport/TIMING_MET').text
+        d['bram'] = root.find('AreaReport/Resources/BRAM').text
+        d['clb'] = root.find('AreaReport/Resources/CLB').text
+        d['dsp'] = root.find('AreaReport/Resources/DSP').text
+        d['ff'] = root.find('AreaReport/Resources/FF').text
+        d['latch'] = root.find('AreaReport/Resources/LATCH').text
+        d['lut'] = root.find('AreaReport/Resources/LUT').text
+
+        return d
+    except FileNotFoundError as e:
+        print(f"Unable to open file!: {e}", file=sys.stderr)
+        return None
 
 def add_extra_fields(d: dict):
     """
@@ -51,7 +61,7 @@ def add_extra_fields(d: dict):
 
     fmax_str = 'NA'
     throughput_str = 'NA'
-    efficiency_str = 'NA'
+    efficiency_str = 'NA' # Throughput / CLB
     if cp != 'NA':
         fmax = 1 / (float(cp) * 10**-9) # Clock period is provided in nano seconds
         throughput = fmax/initial_interval
